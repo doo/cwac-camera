@@ -20,14 +20,14 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import com.actionbarsherlock.app.SherlockFragment;
+import android.support.v4.app.Fragment;
 import com.commonsware.cwac.camera.CameraHost;
 import com.commonsware.cwac.camera.CameraView;
 import com.commonsware.cwac.camera.SimpleCameraHost;
 import com.commonsware.cwac.camera.ZoomTransaction;
 
 @TargetApi(Build.VERSION_CODES.GINGERBREAD)
-public class CameraFragment extends SherlockFragment {
+public class CameraFragment extends Fragment {
   private CameraView cameraView=null;
   private CameraHost host=null;
 
