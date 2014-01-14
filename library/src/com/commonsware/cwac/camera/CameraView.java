@@ -115,6 +115,10 @@ public class CameraView extends ViewGroup implements
               && getHost() instanceof Camera.FaceDetectionListener) {
             camera.setFaceDetectionListener((Camera.FaceDetectionListener)getHost());
           }
+
+          if (getHost() instanceof Camera.PreviewCallback) {
+            camera.setPreviewCallback((Camera.PreviewCallback)getHost());
+          }
         }
         catch (Exception e) {
           getHost().onCameraFail(FailureReason.UNKNOWN);
@@ -128,6 +132,7 @@ public class CameraView extends ViewGroup implements
 
   public void onPause() {
     if (camera != null) {
+      camera.setPreviewCallback(null);
       previewDestroyed();
       removeView(previewStrategy.getWidget());
     }
