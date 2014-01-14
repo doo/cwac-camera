@@ -17,9 +17,64 @@ required to successfully show a preview, take a picture, and take a video.
 behind a scalable API. Here, "scalable" means "simple things are simple,
 but complex things may be a bit complex".
 
-This Android library project is also
-[available as a JAR](https://github.com/commonsguy/cwac-camera/releases).
+In addition to what is written here,
 JavaDocs [are also available](http://javadocs.commonsware.com/cwac/camera/index.html).
+
+Installation
+------------
+If you are using Eclipse, Ant, or otherwise need JAR files,
+there are two JARs in
+[the releases area of the repo](https://github.com/commonsguy/cwac-camera/releases):
+
+- `camera-X.Y.Z.jar` represents the core classes, used in all environments
+- `camera-v9-X.Y.Z.jar` adds support for ActionBarSherlock
+
+(where `X.Y.Z` is the version number of the project, such as `0.5.4`)
+
+If you are using Gradle, or otherwise can use AAR artifacts,
+there are two such artifacts, mirroring the contents of the two JARs:
+one for native API Level 11 fragments, one for ActionBarSherlock.
+
+To integrate the core AAR, the Gradle recipe is:
+
+```groovy
+repositories {
+    maven {
+        url "https://repo.commonsware.com.s3.amazonaws.com"
+    }
+}
+
+dependencies {
+    compile 'com.commonsware.cwac:camera:0.5.4'
+}
+```
+
+To integrate the `-v9` AAR for ActionBarSherlock support, the
+Gradle recipe is:
+
+```groovy
+repositories {
+    mavenCentral();
+
+    maven {
+        url "https://repo.commonsware.com.s3.amazonaws.com"
+    }
+}
+
+dependencies {
+    compile('com.commonsware.cwac:camera-v9:0.5.4') {
+      exclude module: 'support-v4'
+    }
+
+    compile 'com.android.support:support-v4:18.0.+'
+}
+```
+
+(where you can choose your own version number for the `support-v4` dependency
+as desired)
+
+You are also welcome to clone this repo and use `camera/` and
+`camera-v9/` as Android library projects in source form.
 
 If you are upgrading a project using CWAC-Camera to a new edition of the
 library, please see
@@ -28,9 +83,7 @@ library, please see
 Basic Usage
 -----------
 
-Step #1: Download the JAR and put it in the `libs/` directory of your
-project (or, if you prefer, clone this GitHub repo and add
-it as a library project to your main project).
+Step #1: Install the JARs or AARs as described above.
 
 Step #2: Add a `CameraFragment` to your UI. You have two versions of
 `CameraFragment` to choose from:
@@ -744,6 +797,7 @@ the fence may work, but it may not.
 
 Release Notes
 -------------
+- v0.5.4: refactored into two libraries, added Gradle support and AAR artifacts
 - v0.5.2: face detection, zoom, and demo bug fixes
 - v0.5.1: added face detection support
 - v0.5.0: zoom support, layout resource support, JavaDocs, etc.
