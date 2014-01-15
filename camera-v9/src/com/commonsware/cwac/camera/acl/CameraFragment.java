@@ -26,7 +26,10 @@ import com.commonsware.cwac.camera.CameraView;
 import com.commonsware.cwac.camera.SimpleCameraHost;
 import com.commonsware.cwac.camera.ZoomTransaction;
 
+import java.lang.Deprecated;
+
 @TargetApi(Build.VERSION_CODES.GINGERBREAD)
+@Deprecated
 public class CameraFragment extends Fragment {
   private CameraView cameraView=null;
   private CameraHost host=null;

@@ -15,7 +15,7 @@
 package com.commonsware.cwac.camera;
 
 import android.annotation.TargetApi;
-import android.app.Fragment;
+import android.support.v4.app.Fragment;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -107,7 +107,7 @@ public class CameraFragment extends Fragment {
    * Call this (or override getHost()) to supply the
    * CameraHost used for most of the detailed interaction
    * with the camera.
-   * 
+   *
    * @param host
    *          a CameraHost instance, such as a subclass of
    *          SimpleCameraHost
@@ -126,7 +126,7 @@ public class CameraFragment extends Fragment {
 
   /**
    * Call this to take a picture.
-   * 
+   *
    * @param needBitmap
    *          true if you need to be passed a Bitmap result,
    *          false otherwise

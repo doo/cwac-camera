@@ -180,7 +180,11 @@ public class CameraView extends ViewGroup implements
     }
   }
 
-  // based on CameraPreview.java from ApiDemos
+    public Camera.Size getPreviewSize() {
+        return previewSize;
+    }
+
+    // based on CameraPreview.java from ApiDemos
 
   @Override
   protected void onLayout(boolean changed, int l, int t, int r, int b) {
