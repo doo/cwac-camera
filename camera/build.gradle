@@ -15,7 +15,7 @@ version '0.5.4'
 group 'com.commonsware.cwac'
 
 repositories {
-    // mavenCentral()
+  // mavenCentral()
 }
 
 dependencies {
