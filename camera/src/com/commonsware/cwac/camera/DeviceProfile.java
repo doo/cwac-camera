@@ -21,9 +21,9 @@ public class DeviceProfile {
   private static volatile DeviceProfile SINGLETON=null;
 
   synchronized public static DeviceProfile getInstance() {
-     android.util.Log.e("DeviceProfile", Build.PRODUCT);
-     android.util.Log.e("DeviceProfile",
-     Build.MANUFACTURER);
+//     android.util.Log.e("DeviceProfile", Build.PRODUCT);
+//     android.util.Log.e("DeviceProfile",
+//     Build.MANUFACTURER);
 
     if (SINGLETON == null) {
       if ("occam".equals(Build.PRODUCT)) {

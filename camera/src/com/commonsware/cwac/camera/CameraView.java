@@ -94,6 +94,21 @@ public class CameraView extends ViewGroup implements
     }
   }
 
+  public Camera.Parameters getCameraParameters() {
+    if (camera != null) {
+      return camera.getParameters();
+    } else {
+      return previewParams;
+    }
+  }
+
+  public void setCameraParameters(Camera.Parameters parameters) {
+    if (camera != null) {
+      camera.setParameters(parameters);
+    }
+    previewParams = parameters;
+  }
+
   @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
   public void onResume() {
     addView(previewStrategy.getWidget());
