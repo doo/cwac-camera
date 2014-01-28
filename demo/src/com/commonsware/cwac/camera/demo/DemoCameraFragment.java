@@ -14,6 +14,7 @@
 
 package com.commonsware.cwac.camera.demo;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
 import android.hardware.Camera;
@@ -135,6 +136,7 @@ public class DemoCameraFragment extends CameraFragment implements
         return(true);
 
       case R.id.autofocus:
+        takePictureItem.setEnabled(false);
         autoFocus();
 
         return(true);
@@ -142,6 +144,12 @@ public class DemoCameraFragment extends CameraFragment implements
       case R.id.single_shot:
         item.setChecked(!item.isChecked());
         getContract().setSingleShotMode(item.isChecked());
+
+        return(true);
+
+      case R.id.show_zoom:
+        item.setChecked(!item.isChecked());
+        zoom.setVisibility(item.isChecked() ? View.VISIBLE : View.GONE);
 
         return(true);
     }
@@ -281,6 +289,14 @@ public class DemoCameraFragment extends CameraFragment implements
           lastFaceToast=now;
         }
       }
+    }
+
+    @Override
+    @TargetApi(16)
+    public void onAutoFocus(boolean success, Camera camera) {
+      super.onAutoFocus(success, camera);
+
+      takePictureItem.setEnabled(true);
     }
   }
 }

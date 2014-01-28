@@ -14,8 +14,10 @@
 
 package com.commonsware.cwac.camera.acl.demo;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
+import android.hardware.Camera;
 import android.os.Bundle;
 import android.widget.Toast;
 import com.actionbarsherlock.view.Menu;
@@ -74,6 +76,7 @@ public class DemoCameraFragment extends CameraFragment {
         return(true);
 
       case R.id.autofocus:
+        takePictureItem.setEnabled(false);
         autoFocus();
 
         return(true);
@@ -154,6 +157,14 @@ public class DemoCameraFragment extends CameraFragment {
       Toast.makeText(getActivity(),
                      "Sorry, but you cannot use the camera now!",
                      Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    @TargetApi(16)
+    public void onAutoFocus(boolean success, Camera camera) {
+      super.onAutoFocus(success, camera);
+      
+      takePictureItem.setEnabled(true);
     }
   }
 }

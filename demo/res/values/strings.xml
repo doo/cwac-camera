@@ -12,5 +12,6 @@
 	<string name="auto_focus">Auto-focus</string>
 	<string name="single_shot_mode">Single-Shot Mode</string>
 	<string name="no_image">There was no image to show!</string>
+	<string name="show_zoom">Show Zoom</string>
 
 </resources>

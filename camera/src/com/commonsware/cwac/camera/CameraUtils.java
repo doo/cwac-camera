@@ -116,7 +116,7 @@ public class CameraUtils {
 
     for (Camera.Size size : parameters.getSupportedPictureSizes()) {
       
-android.util.Log.d("CWAC-Camera", String.format("%d x %d", size.width, size.height));
+//android.util.Log.d("CWAC-Camera", String.format("%d x %d", size.width, size.height));
       
       if (size.height <= DeviceProfile.getInstance()
                                       .getMaxPictureHeight()

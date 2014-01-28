@@ -19,18 +19,24 @@
 		android:title="@string/stop"
 		android:visible="false">
 	</item>
-  <item
-    android:id="@+id/autofocus"
-    android:showAsAction="never"
-    android:title="@string/auto_focus"
-    android:enabled="false">
-  </item>
-  <item
-    android:id="@+id/single_shot"
-    android:checkable="true"
-    android:checked="false"
-    android:showAsAction="never"
-    android:title="@string/single_shot_mode">
-  </item>
-  	
+	<item
+		android:id="@+id/autofocus"
+		android:enabled="false"
+		android:showAsAction="never"
+		android:title="@string/auto_focus">
+	</item>
+	<item
+		android:id="@+id/single_shot"
+		android:checkable="true"
+		android:checked="false"
+		android:showAsAction="never"
+		android:title="@string/single_shot_mode">
+	</item>
+	<item
+		android:id="@+id/show_zoom"
+		android:checkable="true"
+		android:checked="true"
+		android:title="@string/show_zoom">
+	</item>
+
 </menu>
