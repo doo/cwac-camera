@@ -192,14 +192,15 @@ public class CameraView extends ViewGroup implements
         }
 
         if (newSize != null) {
-          if (previewSize==null) {
+          if (previewSize == null) {
             previewSize=newSize;
           }
-          else if (previewSize.width!=newSize.width || previewSize.height!=newSize.height) {
+          else if (previewSize.width != newSize.width
+              || previewSize.height != newSize.height) {
             if (inPreview) {
               stopPreview();
             }
-            
+
             previewSize=newSize;
             initPreview(width, height, false);
           }
@@ -237,8 +238,12 @@ public class CameraView extends ViewGroup implements
         }
       }
 
-      // Center the child SurfaceView within the parent.
-      if (width * previewHeight > height * previewWidth) {
+      boolean useFirstStrategy=
+          (width * previewHeight > height * previewWidth);
+      boolean useFullBleed=getHost().useFullBleedPreview();
+
+      if ((useFirstStrategy && !useFullBleed)
+          || (!useFirstStrategy && useFullBleed)) {
         final int scaledChildWidth=
             previewWidth * height / previewHeight;
         child.layout((width - scaledChildWidth) / 2, 0,
@@ -472,7 +477,7 @@ public class CameraView extends ViewGroup implements
   public void initPreview(int w, int h) {
     initPreview(w, h, true);
   }
-  
+
   @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
   public void initPreview(int w, int h, boolean firstRun) {
     if (camera != null) {

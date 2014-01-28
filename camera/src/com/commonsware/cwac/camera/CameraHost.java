@@ -278,4 +278,6 @@ public interface CameraHost extends Camera.AutoFocusCallback {
    *          a FailureReason indicating what went wrong
    */
   void onCameraFail(FailureReason reason);
+  
+  boolean useFullBleedPreview();
 }

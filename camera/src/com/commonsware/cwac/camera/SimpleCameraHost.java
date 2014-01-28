@@ -238,6 +238,11 @@ public class SimpleCameraHost implements CameraHost {
     Log.e("CWAC-Camera",
           String.format("Camera access failed: %d", reason.value));
   }
+  
+  @Override
+  public boolean useFullBleedPreview() {
+    return(false);
+  }
 
   protected File getPhotoPath() {
     File dir=getPhotoDirectory();
