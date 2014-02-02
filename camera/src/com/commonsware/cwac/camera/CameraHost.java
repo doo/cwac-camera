@@ -68,7 +68,7 @@ public interface CameraHost extends Camera.AutoFocusCallback {
    *          the Camera.Parameters to be modified
    * @return the Camera.Parameters that was passed in
    */
-  Camera.Parameters adjustPictureParameters(Camera.Parameters parameters);
+  Camera.Parameters adjustPictureParameters(PictureTransaction xact, Camera.Parameters parameters);
 
   /**
    * Implement this to configure the Camera.Parameters for
@@ -158,7 +158,7 @@ public interface CameraHost extends Camera.AutoFocusCallback {
    * @return the size of photo to take (note: must be a
    *         supported size!)
    */
-  Camera.Size getPictureSize(Camera.Parameters parameters);
+  Camera.Size getPictureSize(PictureTransaction xact, Camera.Parameters parameters);
 
   /**
    * Called to allow you to indicate what size preview
@@ -243,7 +243,7 @@ public interface CameraHost extends Camera.AutoFocusCallback {
    * @param bitmap
    *          Bitmap of the picture
    */
-  void saveImage(Bitmap bitmap);
+  void saveImage(PictureTransaction xact, Bitmap bitmap);
 
   /**
    * Called when a picture has been taken. This will be
@@ -252,7 +252,7 @@ public interface CameraHost extends Camera.AutoFocusCallback {
    * @param image
    *          byte array of the picture data (e.g., JPEG)
    */
-  void saveImage(byte[] image);
+  void saveImage(PictureTransaction xact, byte[] image);
 
   /**
    * @return true if you want the camera to keep the preview

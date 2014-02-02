@@ -34,8 +34,7 @@ import android.view.ViewGroup;
 import java.io.IOException;
 import com.commonsware.cwac.camera.CameraHost.FailureReason;
 
-public class CameraView extends ViewGroup implements
-    Camera.PictureCallback, AutoFocusCallback {
+public class CameraView extends ViewGroup implements AutoFocusCallback {
   static final String TAG="CWAC-Camera";
   private PreviewStrategy previewStrategy;
   private Camera.Size previewSize;
@@ -48,8 +47,6 @@ public class CameraView extends ViewGroup implements
   private int cameraId=-1;
   private MediaRecorder recorder=null;
   private Camera.Parameters previewParams=null;
-  private boolean needBitmap=false;
-  private boolean needByteArray=false;
   private boolean isDetectingFaces=false;
   private boolean isAutoFocusing=false;
   private int lastPictureOrientation=-1;
@@ -285,24 +282,9 @@ public class CameraView extends ViewGroup implements
     post(new Runnable() {
       @Override
       public void run() {
-        setCameraDisplayOrientation(cameraId, camera);        
+        setCameraDisplayOrientation(cameraId, camera);
       }
     });
-  }
-
-  @Override
-  public void onPictureTaken(byte[] data, Camera camera) {
-    camera.setParameters(previewParams);
-
-    if (data != null) {
-      new ImageCleanupTask(data, cameraId, getHost(),
-                           getContext().getCacheDir(), needBitmap,
-                           needByteArray, displayOrientation).start();
-    }
-
-    if (!getHost().useSingleShotMode()) {
-      startPreview();
-    }
   }
 
   public void restartPreview() {
@@ -312,28 +294,35 @@ public class CameraView extends ViewGroup implements
   }
 
   public void takePicture(boolean needBitmap, boolean needByteArray) {
+    PictureTransaction xact=new PictureTransaction(getHost());
+
+    takePicture(xact.needBitmap(needBitmap)
+                    .needByteArray(needByteArray));
+  }
+
+  public void takePicture(PictureTransaction xact) {
     if (inPreview) {
       if (isAutoFocusing) {
         throw new IllegalStateException(
                                         "Camera cannot take a picture while auto-focusing");
       }
       else {
-        this.needBitmap=needBitmap;
-        this.needByteArray=needByteArray;
-
         previewParams=camera.getParameters();
 
         Camera.Parameters pictureParams=camera.getParameters();
-        Camera.Size pictureSize=getHost().getPictureSize(pictureParams);
+        Camera.Size pictureSize=
+            xact.host.getPictureSize(xact, pictureParams);
 
         pictureParams.setPictureSize(pictureSize.width,
                                      pictureSize.height);
         pictureParams.setPictureFormat(ImageFormat.JPEG);
-        camera.setParameters(getHost().adjustPictureParameters(pictureParams));
+        camera.setParameters(xact.host.adjustPictureParameters(xact,
+                                                               pictureParams));
 
         setCameraPictureOrientation();
 
-        camera.takePicture(getHost().getShutterCallback(), null, this);
+        camera.takePicture(getHost().getShutterCallback(), null,
+                           new PictureTransactionCallback(xact));
         inPreview=false;
       }
     }
@@ -649,6 +638,30 @@ public class CameraView extends ViewGroup implements
           camera.setParameters(params);
           lastPictureOrientation=outputOrientation;
         }
+      }
+    }
+  }
+
+  private class PictureTransactionCallback implements
+      Camera.PictureCallback {
+    PictureTransaction xact=null;
+
+    PictureTransactionCallback(PictureTransaction xact) {
+      this.xact=xact;
+    }
+
+    @Override
+    public void onPictureTaken(byte[] data, Camera camera) {
+      camera.setParameters(previewParams);
+
+      if (data != null) {
+        new ImageCleanupTask(data, cameraId,
+                             getContext().getCacheDir(), xact,
+                             displayOrientation).start();
+      }
+
+      if (!xact.useSingleShotMode()) {
+        startPreview();
       }
     }
   }

@@ -16,21 +16,16 @@ public class ImageCleanupTask extends Thread {
   private byte[] data;
   private Bitmap workingCopy=null;
   private int cameraId;
-  private CameraHost host;
   private File cacheDir=null;
-  private boolean needBitmap=false;
-  private boolean needByteArray=false;
   private int displayOrientation;
+  private PictureTransaction xact=null;
 
-  ImageCleanupTask(byte[] data, int cameraId, CameraHost host,
-                   File cacheDir, boolean needBitmap,
-                   boolean needByteArray, int displayOrientation) {
+  ImageCleanupTask(byte[] data, int cameraId, File cacheDir,
+                   PictureTransaction xact, int displayOrientation) {
     this.data=data;
     this.cameraId=cameraId;
-    this.host=host;
     this.cacheDir=cacheDir;
-    this.needBitmap=needBitmap;
-    this.needByteArray=needByteArray;
+    this.xact=xact;
     this.displayOrientation=displayOrientation;
   }
 
@@ -41,31 +36,31 @@ public class ImageCleanupTask extends Thread {
     Camera.getCameraInfo(cameraId, info);
 
     if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
-      if (host.getDeviceProfile().portraitFFCFlipped()
+      if (xact.host.getDeviceProfile().portraitFFCFlipped()
           && (displayOrientation == 90 || displayOrientation == 270)) {
         applyFlip();
       }
-      else if (host.mirrorFFC()) {
+      else if (xact.mirrorFFC()) {
         applyMirror();
       }
     }
 
-    if (host.rotateBasedOnExif()
-        && host.getDeviceProfile().encodesRotationToExif()) {
+    if (xact.rotateBasedOnExif()
+        && xact.host.getDeviceProfile().encodesRotationToExif()) {
       rotateForRealz();
     }
 
-    synchronizeModels(needBitmap, needByteArray);
+    synchronizeModels(xact.needBitmap, xact.needByteArray);
 
-    if (needBitmap) {
-      host.saveImage(workingCopy);
+    if (xact.needBitmap) {
+      xact.host.saveImage(xact, workingCopy);
     }
     else if (workingCopy != null) {
       workingCopy.recycle();
     }
 
-    if (needByteArray) {
-      host.saveImage(data);
+    if (xact.needByteArray) {
+      xact.host.saveImage(xact, data);
     }
   }
 

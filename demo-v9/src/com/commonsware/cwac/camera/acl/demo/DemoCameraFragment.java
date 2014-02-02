@@ -24,6 +24,7 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.commonsware.cwac.camera.CameraHost;
+import com.commonsware.cwac.camera.PictureTransaction;
 import com.commonsware.cwac.camera.SimpleCameraHost;
 import com.commonsware.cwac.camera.acl.CameraFragment;
 
@@ -121,7 +122,7 @@ public class DemoCameraFragment extends CameraFragment {
     }
 
     @Override
-    public void saveImage(byte[] image) {
+    public void saveImage(PictureTransaction xact, byte[] image) {
       if (useSingleShotMode()) {
         singleShotProcessing=false;
 
@@ -136,7 +137,7 @@ public class DemoCameraFragment extends CameraFragment {
         startActivity(new Intent(getActivity(), DisplayActivity.class));
       }
       else {
-        super.saveImage(image);
+        super.saveImage(xact, image);
       }
     }
 
