@@ -139,6 +139,17 @@ public class CameraFragment extends Fragment {
   }
 
   /**
+   * Call this to take a picture.
+   * 
+   * @param xact
+   *          PictureTransaction with configuration data for
+   *          the picture to be taken
+   */
+  public void takePicture(PictureTransaction xact) {
+    cameraView.takePicture(xact);
+  }
+
+  /**
    * @return true if we are recording video right now, false
    *         otherwise
    */
@@ -262,7 +273,7 @@ public class CameraFragment extends Fragment {
   public void stopFaceDetection() {
     cameraView.stopFaceDetection();
   }
-  
+
   public boolean doesZoomReallyWork() {
     return(cameraView.doesZoomReallyWork());
   }

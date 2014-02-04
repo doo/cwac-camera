@@ -23,6 +23,7 @@ import android.view.ViewGroup;
 import android.support.v4.app.Fragment;
 import com.commonsware.cwac.camera.CameraHost;
 import com.commonsware.cwac.camera.CameraView;
+import com.commonsware.cwac.camera.PictureTransaction;
 import com.commonsware.cwac.camera.SimpleCameraHost;
 import com.commonsware.cwac.camera.ZoomTransaction;
 
@@ -76,6 +77,17 @@ public class CameraFragment extends Fragment {
 
   public void takePicture(boolean needBitmap, boolean needByteArray) {
     cameraView.takePicture(needBitmap, needByteArray);
+  }
+
+  /**
+   * Call this to take a picture.
+   * 
+   * @param xact
+   *          PictureTransaction with configuration data for
+   *          the picture to be taken
+   */
+  public void takePicture(PictureTransaction xact) {
+    cameraView.takePicture(xact);
   }
 
   public boolean isRecording() {

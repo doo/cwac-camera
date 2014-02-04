@@ -35,6 +35,7 @@ import android.widget.Toast;
 import com.commonsware.cwac.camera.CameraFragment;
 import com.commonsware.cwac.camera.CameraHost;
 import com.commonsware.cwac.camera.SimpleCameraHost;
+import com.commonsware.cwac.camera.PictureTransaction;
 
 public class DemoCameraFragment extends CameraFragment implements
     OnSeekBarChangeListener {
@@ -62,7 +63,14 @@ public class DemoCameraFragment extends CameraFragment implements
     super.onCreate(state);
 
     setHasOptionsMenu(true);
-    setHost(new DemoCameraHost(getActivity()));
+
+    SimpleCameraHost.Builder builder=
+        new SimpleCameraHost.Builder(new DemoCameraHost(getActivity()));
+
+    // other builder configuration would go here, for things
+    // that are static for the lifetime of the host instance
+
+    setHost(builder.build());
   }
 
   @Override
@@ -103,7 +111,7 @@ public class DemoCameraFragment extends CameraFragment implements
           takePictureItem.setEnabled(false);
         }
 
-        takePicture();
+        takePicture(new PictureTransaction(getHost()));
 
         return(true);
 
@@ -214,7 +222,7 @@ public class DemoCameraFragment extends CameraFragment implements
     }
 
     @Override
-    public void saveImage(byte[] image) {
+    public void saveImage(PictureTransaction xact, byte[] image) {
       if (useSingleShotMode()) {
         singleShotProcessing=false;
 
@@ -229,7 +237,7 @@ public class DemoCameraFragment extends CameraFragment implements
         startActivity(new Intent(getActivity(), DisplayActivity.class));
       }
       else {
-        super.saveImage(image);
+        super.saveImage(xact, image);
       }
     }
 

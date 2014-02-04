@@ -68,7 +68,7 @@ public interface CameraHost extends Camera.AutoFocusCallback {
    *          the Camera.Parameters to be modified
    * @return the Camera.Parameters that was passed in
    */
-  Camera.Parameters adjustPictureParameters(Camera.Parameters parameters);
+  Camera.Parameters adjustPictureParameters(PictureTransaction xact, Camera.Parameters parameters);
 
   /**
    * Implement this to configure the Camera.Parameters for
@@ -158,7 +158,7 @@ public interface CameraHost extends Camera.AutoFocusCallback {
    * @return the size of photo to take (note: must be a
    *         supported size!)
    */
-  Camera.Size getPictureSize(Camera.Parameters parameters);
+  Camera.Size getPictureSize(PictureTransaction xact, Camera.Parameters parameters);
 
   /**
    * Called to allow you to indicate what size preview
@@ -227,23 +227,13 @@ public interface CameraHost extends Camera.AutoFocusCallback {
   boolean mirrorFFC();
 
   /**
-   * @return true if you want the library to rotate the
-   *         image file to match what is in the EXIF
-   *         headers, which can be useful for devices that,
-   *         in portrait mode, take landscape pictures and
-   *         simply mark them via EXIF headers that picture
-   *         viewers should rotate the image
-   */
-  boolean rotateBasedOnExif();
-
-  /**
    * Called when a picture has been taken. This will be
    * called on a background thread.
    * 
    * @param bitmap
    *          Bitmap of the picture
    */
-  void saveImage(Bitmap bitmap);
+  void saveImage(PictureTransaction xact, Bitmap bitmap);
 
   /**
    * Called when a picture has been taken. This will be
@@ -252,7 +242,7 @@ public interface CameraHost extends Camera.AutoFocusCallback {
    * @param image
    *          byte array of the picture data (e.g., JPEG)
    */
-  void saveImage(byte[] image);
+  void saveImage(PictureTransaction xact, byte[] image);
 
   /**
    * @return true if you want the camera to keep the preview
@@ -280,4 +270,6 @@ public interface CameraHost extends Camera.AutoFocusCallback {
   void onCameraFail(FailureReason reason);
   
   boolean useFullBleedPreview();
+  
+  float maxPictureCleanupHeapUsage();
 }

@@ -35,13 +35,25 @@ import java.util.Locale;
 public class SimpleCameraHost implements CameraHost {
   private static final String[] SCAN_TYPES= { "image/jpeg" };
   private Context ctxt=null;
+  private int cameraId=-1;
+  private DeviceProfile profile=null;
+  private File photoDirectory=null;
+  private File videoDirectory=null;
+  private RecordingHint recordingHint=null;
+  private boolean mirrorFFC=false;
+  private boolean rotateBasedOnExif=true;
+  private boolean useFrontFacingCamera=false;
+  private boolean scanSavedImage=true;
+  private boolean useFullBleedPreview=false;
+  private boolean useSingleShotMode=false;
 
   public SimpleCameraHost(Context _ctxt) {
     this.ctxt=_ctxt.getApplicationContext();
   }
 
   @Override
-  public Camera.Parameters adjustPictureParameters(Camera.Parameters parameters) {
+  public Camera.Parameters adjustPictureParameters(PictureTransaction xact,
+                                                   Camera.Parameters parameters) {
     return(parameters);
   }
 
@@ -86,6 +98,14 @@ public class SimpleCameraHost implements CameraHost {
 
   @Override
   public int getCameraId() {
+    if (cameraId == -1) {
+      initCameraId();
+    }
+
+    return(cameraId);
+  }
+
+  private void initCameraId() {
     int count=Camera.getNumberOfCameras();
     int result=-1;
 
@@ -110,16 +130,25 @@ public class SimpleCameraHost implements CameraHost {
       }
     }
 
-    return(result);
+    cameraId=result;
   }
 
   @Override
   public DeviceProfile getDeviceProfile() {
-    return(DeviceProfile.getInstance());
+    if (profile == null) {
+      initDeviceProfile();
+    }
+
+    return(profile);
+  }
+
+  private void initDeviceProfile() {
+    profile=DeviceProfile.getInstance();
   }
 
   @Override
-  public Camera.Size getPictureSize(Camera.Parameters parameters) {
+  public Camera.Size getPictureSize(PictureTransaction xact,
+                                    Camera.Parameters parameters) {
     return(CameraUtils.getLargestPictureSize(parameters));
   }
 
@@ -163,16 +192,16 @@ public class SimpleCameraHost implements CameraHost {
 
   @Override
   public boolean mirrorFFC() {
-    return(false);
+    return(mirrorFFC);
   }
 
   @Override
-  public void saveImage(Bitmap bitmap) {
+  public void saveImage(PictureTransaction xact, Bitmap bitmap) {
     // no-op
   }
 
   @Override
-  public void saveImage(byte[] image) {
+  public void saveImage(PictureTransaction xact, byte[] image) {
     File photo=getPhotoPath();
 
     if (photo.exists()) {
@@ -210,7 +239,7 @@ public class SimpleCameraHost implements CameraHost {
 
   @Override
   public boolean useSingleShotMode() {
-    return(false);
+    return(useSingleShotMode);
   }
 
   @Override
@@ -224,13 +253,16 @@ public class SimpleCameraHost implements CameraHost {
   }
 
   @Override
-  public boolean rotateBasedOnExif() {
-    return(true);
+  public RecordingHint getRecordingHint() {
+    if (recordingHint == null) {
+      initRecordingHint();
+    }
+
+    return(recordingHint);
   }
 
-  @Override
-  public RecordingHint getRecordingHint() {
-    return(RecordingHint.ANY);
+  private void initRecordingHint() {
+    recordingHint=RecordingHint.ANY;
   }
 
   @Override
@@ -238,12 +270,17 @@ public class SimpleCameraHost implements CameraHost {
     Log.e("CWAC-Camera",
           String.format("Camera access failed: %d", reason.value));
   }
-  
+
   @Override
   public boolean useFullBleedPreview() {
-    return(false);
+    return(useFullBleedPreview);
   }
 
+  @Override
+  public float maxPictureCleanupHeapUsage() {
+    return(1.0f);
+  }
+  
   protected File getPhotoPath() {
     File dir=getPhotoDirectory();
 
@@ -253,7 +290,16 @@ public class SimpleCameraHost implements CameraHost {
   }
 
   protected File getPhotoDirectory() {
-    return(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM));
+    if (photoDirectory == null) {
+      initPhotoDirectory();
+    }
+
+    return(photoDirectory);
+  }
+
+  private void initPhotoDirectory() {
+    photoDirectory=
+        Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
   }
 
   protected String getPhotoFilename() {
@@ -272,7 +318,16 @@ public class SimpleCameraHost implements CameraHost {
   }
 
   protected File getVideoDirectory() {
-    return(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES));
+    if (videoDirectory == null) {
+      initVideoDirectory();
+    }
+
+    return(videoDirectory);
+  }
+
+  private void initVideoDirectory() {
+    videoDirectory=
+        Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES);
   }
 
   protected String getVideoFilename() {
@@ -283,10 +338,92 @@ public class SimpleCameraHost implements CameraHost {
   }
 
   protected boolean useFrontFacingCamera() {
-    return(false);
+    return(useFrontFacingCamera);
   }
 
   protected boolean scanSavedImage() {
-    return(true);
+    return(scanSavedImage);
+  }
+
+  public static class Builder {
+    private SimpleCameraHost host=null;
+
+    public Builder(Context ctxt) {
+      this(new SimpleCameraHost(ctxt));
+    }
+
+    public Builder(SimpleCameraHost host) {
+      this.host=host;
+    }
+
+    public SimpleCameraHost build() {
+      return(host);
+    }
+
+    public Builder cameraId(int cameraId) {
+      host.cameraId=cameraId;
+
+      return(this);
+    }
+
+    public Builder deviceProfile(DeviceProfile profile) {
+      host.profile=profile;
+
+      return(this);
+    }
+
+    public Builder mirrorFFC(boolean mirrorFFC) {
+      host.mirrorFFC=mirrorFFC;
+
+      return(this);
+    }
+
+    public Builder photoDirectory(File photoDirectory) {
+      host.photoDirectory=photoDirectory;
+
+      return(this);
+    }
+
+    public Builder recordingHint(RecordingHint recordingHint) {
+      host.recordingHint=recordingHint;
+
+      return(this);
+    }
+
+    public Builder rotateBasedOnExif(boolean rotateBasedOnExif) {
+      host.rotateBasedOnExif=rotateBasedOnExif;
+
+      return(this);
+    }
+
+    public Builder scanSavedImage(boolean scanSavedImage) {
+      host.scanSavedImage=scanSavedImage;
+
+      return(this);
+    }
+
+    public Builder useFrontFacingCamera(boolean useFrontFacingCamera) {
+      host.useFrontFacingCamera=useFrontFacingCamera;
+
+      return(this);
+    }
+
+    public Builder useFullBleedPreview(boolean useFullBleedPreview) {
+      host.useFullBleedPreview=useFullBleedPreview;
+
+      return(this);
+    }
+
+    public Builder useSingleShotMode(boolean useSingleShotMode) {
+      host.useSingleShotMode=useSingleShotMode;
+
+      return(this);
+    }
+
+    public Builder videoDirectory(File videoDirectory) {
+      host.videoDirectory=videoDirectory;
+
+      return(this);
+    }
   }
 }

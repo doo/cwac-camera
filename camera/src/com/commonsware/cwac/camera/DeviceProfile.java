@@ -21,9 +21,8 @@ public class DeviceProfile {
   private static volatile DeviceProfile SINGLETON=null;
 
   synchronized public static DeviceProfile getInstance() {
-//     android.util.Log.e("DeviceProfile", Build.PRODUCT);
-//     android.util.Log.e("DeviceProfile",
-//     Build.MANUFACTURER);
+//    android.util.Log.e("DeviceProfile", Build.PRODUCT);
+//    android.util.Log.e("DeviceProfile", Build.MANUFACTURER);
 
     if (SINGLETON == null) {
       if ("occam".equals(Build.PRODUCT)) {
@@ -32,6 +31,10 @@ public class DeviceProfile {
       else if ("m7".equals(Build.PRODUCT)
           && "HTC".equalsIgnoreCase(Build.MANUFACTURER)) {
         SINGLETON=new HtcOneDeviceProfile();
+      }
+      else if ("nakasi".equals(Build.PRODUCT)
+          && "asus".equalsIgnoreCase(Build.MANUFACTURER)) {
+        SINGLETON=new NexusSeven2012Profile();
       }
       else if (("d2att".equals(Build.PRODUCT) || "d2spr".equals(Build.PRODUCT))
           && "samsung".equalsIgnoreCase(Build.MANUFACTURER)) {
@@ -49,23 +52,26 @@ public class DeviceProfile {
       else if ("loganub".equals(Build.PRODUCT)) {
         SINGLETON=new SamsungGalaxyAce3Profile();
       }
-      else if ("samsung".equalsIgnoreCase(Build.MANUFACTURER)) {
-        SINGLETON=new SamsungDeviceProfile();
-      }
+      // else if
+      // ("samsung".equalsIgnoreCase(Build.MANUFACTURER)) {
+      // SINGLETON=new SamsungDeviceProfile();
+      // }
       else if ("motorola".equalsIgnoreCase(Build.MANUFACTURER)) {
         if ("XT890_rtgb".equals(Build.PRODUCT)) {
           SINGLETON=new MotorolaRazrIProfile();
         }
-        else {
-          SINGLETON=new MotorolaDeviceProfile();
-        }
+        // else {
+        // SINGLETON=new MotorolaDeviceProfile();
+        // }
       }
       else if ("htc_vivow".equalsIgnoreCase(Build.PRODUCT)) {
         SINGLETON=new DroidIncredible2Profile();
       }
-      else if ("C1505_1271-7585".equalsIgnoreCase(Build.PRODUCT)) {
-        SINGLETON=new SonyXperiaEProfile();
-      }
+      // else if
+      // ("C1505_1271-7585".equalsIgnoreCase(Build.PRODUCT))
+      // {
+      // SINGLETON=new SonyXperiaEProfile();
+      // }
       else {
         SINGLETON=new DeviceProfile();
       }
@@ -79,14 +85,6 @@ public class DeviceProfile {
 
   public boolean useTextureView() {
     return(Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1 && !isCyanogenMod());
-  }
-
-  public boolean encodesRotationToExif() {
-    return(false);
-  }
-
-  public boolean rotateBasedOnExif() {
-    return(false);
   }
 
   public boolean portraitFFCFlipped() {
@@ -112,6 +110,13 @@ public class DeviceProfile {
     return(true);
   }
 
+  // only needed if EXIF headers are mis-coded, such
+  // as on Nexus 7 (2012)
+
+  public int getDefaultOrientation() {
+    return(0);
+  }
+
   // based on http://stackoverflow.com/a/9801191/115145
   // and
   // https://github.com/commonsguy/cwac-camera/issues/43#issuecomment-23791446
@@ -120,8 +125,13 @@ public class DeviceProfile {
     return(System.getProperty("os.version").contains("cyanogenmod") || Build.HOST.contains("cyanogenmod"));
   }
 
-  private static class MotorolaRazrIProfile extends
-      MotorolaDeviceProfile {
+  private static class NexusSeven2012Profile extends DeviceProfile {
+    public int getDefaultOrientation() {
+      return(270);
+    }
+  }
+
+  private static class MotorolaRazrIProfile extends DeviceProfile {
     public boolean doesZoomActuallyWork(boolean isFFC) {
       return(!isFFC);
     }
@@ -155,38 +165,18 @@ public class DeviceProfile {
     }
   }
 
-  public static class FullExifFixupDeviceProfile extends DeviceProfile {
-    @Override
-    public boolean encodesRotationToExif() {
-      return(true);
-    }
-
-    @Override
-    public boolean rotateBasedOnExif() {
-      return(true);
-    }
-  }
-
-  private static class SamsungDeviceProfile extends
-      FullExifFixupDeviceProfile {
-  }
-
   private static class SamsungGalaxyS3DeviceProfile extends
-      SamsungDeviceProfile {
+      DeviceProfile {
     public int getMinPictureHeight() {
       return(1836);
     }
   }
 
   private static class SamsungGalaxyCameraDeviceProfile extends
-      SamsungDeviceProfile {
+      DeviceProfile {
     public int getMaxPictureHeight() {
       return(3072);
     }
-  }
-
-  private static class MotorolaDeviceProfile extends
-      FullExifFixupDeviceProfile {
   }
 
   private static class DroidIncredible2Profile extends DeviceProfile {
@@ -197,9 +187,5 @@ public class DeviceProfile {
     public int getMaxPictureHeight() {
       return(1952);
     }
-  }
-
-  private static class SonyXperiaEProfile extends
-      FullExifFixupDeviceProfile {
   }
 }
