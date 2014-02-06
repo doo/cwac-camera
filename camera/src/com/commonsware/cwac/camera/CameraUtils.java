@@ -115,9 +115,10 @@ public class CameraUtils {
     Camera.Size result=null;
 
     for (Camera.Size size : parameters.getSupportedPictureSizes()) {
-      
-//android.util.Log.d("CWAC-Camera", String.format("%d x %d", size.width, size.height));
-      
+
+      // android.util.Log.d("CWAC-Camera",
+      // String.format("%d x %d", size.width, size.height));
+
       if (size.height <= DeviceProfile.getInstance()
                                       .getMaxPictureHeight()
           && size.height >= DeviceProfile.getInstance()
@@ -157,6 +158,24 @@ public class CameraUtils {
     }
 
     return(result);
+  }
+
+  public static String findBestFlashModeMatch(Camera.Parameters params,
+                                              String... modes) {
+    String match=null;
+
+    List<String> flashModes=params.getSupportedFlashModes();
+
+    if (flashModes != null) {
+      for (String mode : modes) {
+        if (flashModes.contains(mode)) {
+          match=mode;
+          break;
+        }
+      }
+    }
+
+    return(match);
   }
 
   private static class SizeComparator implements

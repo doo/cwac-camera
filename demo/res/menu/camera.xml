@@ -38,5 +38,11 @@
 		android:checked="true"
 		android:title="@string/show_zoom">
 	</item>
-
+  <item
+    android:id="@+id/flash"
+    android:checkable="true"
+    android:checked="true"
+    android:title="@string/flash">
+  </item>
+	
 </menu>

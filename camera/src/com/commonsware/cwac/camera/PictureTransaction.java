@@ -14,7 +14,9 @@
 
 package com.commonsware.cwac.camera;
 
-public class PictureTransaction {
+import android.hardware.Camera;
+
+public class PictureTransaction implements Camera.ShutterCallback {
   CameraHost host=null;
   boolean needBitmap=false;
   boolean needByteArray=true;
@@ -22,6 +24,8 @@ public class PictureTransaction {
   boolean mirrorFFC=false;
   boolean useSingleShotMode=false;
   int displayOrientation=0;
+  String flashMode=null;
+  CameraView cameraView=null;
 
   public PictureTransaction(CameraHost host) {
     this.host=host;
@@ -68,10 +72,25 @@ public class PictureTransaction {
 
     return(this);
   }
-  
+
+  public PictureTransaction flashMode(String flashMode) {
+    this.flashMode=flashMode;
+
+    return(this);
+  }
+
   PictureTransaction displayOrientation(int displayOrientation) {
     this.displayOrientation=displayOrientation;
-    
+
     return(this);
+  }
+
+  @Override
+  public void onShutter() {
+    Camera.ShutterCallback cb=host.getShutterCallback();
+
+    if (cb != null) {
+      cb.onShutter();
+    }
   }
 }

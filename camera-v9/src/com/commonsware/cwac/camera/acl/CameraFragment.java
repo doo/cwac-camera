@@ -125,4 +125,8 @@ public class CameraFragment extends Fragment {
   public boolean doesZoomReallyWork() {
     return(cameraView.doesZoomReallyWork());
   }
+  
+  public void setFlashMode(String mode) {
+    cameraView.setFlashMode(mode);
+  }
 }

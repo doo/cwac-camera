@@ -316,12 +316,17 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
         pictureParams.setPictureSize(pictureSize.width,
                                      pictureSize.height);
         pictureParams.setPictureFormat(ImageFormat.JPEG);
+
+        if (xact.flashMode != null) {
+          pictureParams.setFlashMode(xact.flashMode);
+        }
+
         camera.setParameters(xact.host.adjustPictureParameters(xact,
                                                                pictureParams));
-
         setCameraPictureOrientation();
+        xact.cameraView=this;
 
-        camera.takePicture(getHost().getShutterCallback(), null,
+        camera.takePicture(xact, null,
                            new PictureTransactionCallback(xact));
         inPreview=false;
       }
@@ -405,6 +410,15 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
 
   public String getFlashMode() {
     return(camera.getParameters().getFlashMode());
+  }
+
+  public void setFlashMode(String mode) {
+    if (camera != null) {
+      Camera.Parameters params=camera.getParameters();
+
+      params.setFlashMode(mode);
+      camera.setParameters(params);
+    }
   }
 
   public ZoomTransaction zoomTo(int level) {
