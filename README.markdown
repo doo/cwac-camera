@@ -1,5 +1,5 @@
-CWAC-Camera: Taking Pictures. Made Sensible.
-============================================
+CWAC-Camera: Taking Pictures. Made (Somewhat) Sensible.
+=======================================================
 
 Taking pictures or videos using a third-party app is fairly straightforward,
 using `ACTION_IMAGE_CAPTURE` or `ACTION_VIDEO_CAPTURE`. However, you as the
@@ -22,17 +22,8 @@ JavaDocs [are also available](http://javadocs.commonsware.com/cwac/camera/index.
 
 Installation
 ------------
-If you are using Eclipse, Ant, or otherwise need JAR files,
-there are two JARs in
-[the releases area of the repo](https://github.com/commonsguy/cwac-camera/releases):
-
-- `camera-X.Y.Z.jar` represents the core classes, used in all environments
-- `camera-v9-X.Y.Z.jar` adds support for ActionBarSherlock
-
-(where `X.Y.Z` is the version number of the project, such as `0.5.4`)
-
 If you are using Gradle, or otherwise can use AAR artifacts,
-there are two such artifacts, mirroring the contents of the two JARs:
+there are two such artifacts, mirroring the contents of the two project JARs:
 one for native API Level 11 fragments, one for ActionBarSherlock.
 
 To integrate the core AAR, the Gradle recipe is:
@@ -76,6 +67,24 @@ as desired)
 You are also welcome to clone this repo and use `camera/` and
 `camera-v9/` as Android library projects in source form.
 
+If you are using Eclipse, Ant, or otherwise need JAR files,
+there are two JARs in
+[the releases area of the repo](https://github.com/commonsguy/cwac-camera/releases):
+
+- `camera-X.Y.Z.jar` represents the core classes, used in all environments
+- `camera-v9-X.Y.Z.jar` adds support for ActionBarSherlock
+
+(where `X.Y.Z` is the version number of the project, such as `0.5.4`)
+
+Users of the JARs will also want to copy the contents of
+the `camera/res/xml/` directory into their project, as that directory
+contains XML resources that help the library deal with device-specific
+idiosyncrasies.
+
+Note that the JAR format for this project will be discontinued when
+the library reaches version 1.0. That will not be until mid-2014, but it
+is something that you should keep in mind.
+
 If you are upgrading a project using CWAC-Camera to a new edition of the
 library, please see
 [the "Upgrading" section below](https://github.com/commonsguy/cwac-camera#upgrading).
@@ -105,7 +114,10 @@ you need to size and position it as desired.
 Step #3: Call `takePicture()` on the `CameraFragment` when you want
 to take a picture, which will be stored in the default digital photos
 directory (e.g., `DCIM`) on external storage as `Photo_yyyyMMdd_HHmmss.jpg`, where
-`yyyyMMdd_HHmmss` is replaced by the current date and time.
+`yyyyMMdd_HHmmss` is replaced by the current date and time. Note
+that `takePicture()` can throw an `IllegalStateException` if you
+call it before the preview is ready or if you call it while auto-focus
+is occurring.
 
 Step #3b: Call `startRecording()` and `stopRecording()` on the
 `CameraFragment` to record a video. **NOTE** that this is presently
@@ -114,10 +126,6 @@ for use with native API Level 11+ fragments. The resulting video
 will be stored in the default videos directory (e.g., `Movies`) on external storage as
  `Video_yyyyMMdd_HHmmss.mp4`, where
 `yyyyMMdd_HHmmss` is replaced by the current date and time.
-
-Step #4: Add `android:largeHeap="true"` to the `<application>`
-element in the manifest (a requirement which will hopefully be
-relaxed in the future).
 
 And that's it.
 
@@ -156,11 +164,33 @@ extending `SimpleCameraHost`, the default implementation of `CameraHost`,
 so that you can override only those methods where you want behavior different
 from the default.
 
-Given a customized `CameraHost` implementation, you can pass an instance
-of that to `setHost()` on your `CameraFragment`, to replace the default.
+`SimpleCameraHost` also offers `SimpleCameraHost.Builder`
+that you can use for some simple configuration, instead of creating a subclass
+of `SimpleCameraHost` and overriding methods. Create an instance of the `Builder`
+(passing in a `Context` to the constructor, such as your activity), call the
+various builder-style setters for configuration, and call `build()` to get your
+customized `SimpleCameraHost` instance.
+
+You can pass your customized instance of `CameraHost`
+to `setHost()` on your `CameraFragment`, to replace the default.
 **Do this in `onCreate()` of a `CameraFragment` subclass** (or, if practical,
 just after instantiating your fragment) to ensure that the
 right `CameraHost` is used everywhere.
+
+### PictureTransaction and VideoTransaction
+
+The `takePicture()` method has a zero-argument version that just takes a picture.
+It also has a one-argument version, where the argument is an instance of
+`PictureTransaction`. This will allow you to configure details of this particular
+picture to be taken. You can create a `PictureTransaction` using its constructor,
+which takes an instance of your `CameraHost` as a parameter.
+
+Various sections below will mention using builder-style setters on `PictureTransaction`
+to control how a picture is taken.
+
+`PictureTransaction` has a `tag(Object)` method that allow you to attach
+arbitrary data to the transaction, without having to bother with a subclass. You can
+retrieve that object later via the zero-argument `tag()` method.
 
 ### Controlling the Names and Locations of Output Files
 
@@ -186,16 +216,22 @@ overriding `getPhotoPath()` replaces all of that)
 There are equivalent `getVideoFilename()`, `getVideoDirectory()`, and
 `getVideoPath()` for controlling the output of the next video to be taken.
 
+`SimpleCameraHost.Builder` offers `photoDirectory()` and `videoDirectory()`
+setters, where you provide the `File` pointing to your desired directory.
+
 By default, if you are using `SimpleCameraHost`, your image will be indexed
 by the `MediaStore`. If you do not want this, override `scanSavedImage()`
-to return `false` in your `SimpleCameraHost` subclass. This is called on a
+to return `false` in your `SimpleCameraHost` subclass (or, call `scanSavedImage()`
+and pass in a `boolean` to use by default). This is called on a
 per-image basis.
 
 ### Controlling Which Camera is Used
 
 If you override `useFrontFacingCamera()` on `SimpleCameraHost` to return
 `true`, the front-facing camera will be used, instead of the default rear-facing
-camera.
+camera. You can also call `useFrontFacingCamera()` on your
+`SimpleCameraHost.Builder`, passing in a `boolean`
+default value to use.
 
 Or, override `getDeviceId()` (available on `CameraHost`), and you can provide
 the ID of the specific camera you want. This would involve your choosing an
@@ -203,7 +239,8 @@ available camera based on your own criteria. See the JavaDocs for Android's
 `Camera` class, notably
 [`getNumberOfCameras()`](http://developer.android.com/reference/android/hardware/Camera.html#getNumberOfCameras())
 and [`getCameraInfo()`](http://developer.android.com/reference/android/hardware/Camera.html#getCameraInfo(int, android.hardware.Camera.CameraInfo))
-for more.
+for more. You can also call `deviceId()` on `SimpleCameraHost` to supply
+the camera ID to use.
 
 ### Controlling FFC Mirror Correction
 
@@ -212,7 +249,9 @@ image of what is shown on the preview. If you wish for the front-facing
 camera photos to match the preview, override `mirrorFFC()` on your `CameraHost`
 and have it
 return `true`, and `CWAC-Camera` will reverse the image for you before
-saving it.
+saving it. Or, call `mirrorFFC()` on your `SimpleCameraHost.Builder`, supplying a `boolean`
+value to use as the default. Or, call `mirrorFFC()` on your `PictureTransaction`,
+to control this for an individual picture.
 
 ### Handling Exceptions
 
@@ -221,6 +260,31 @@ There are some exceptions that are thrown by the `Camera` class (and kin, like
 method. The default implementation displays a `Toast` and logs the message
 to LogCat as an error, but you probably will want to replace that with
 something else that integrates better with your UI.
+
+### Supporting "Full-Bleed Preview"
+
+The original default behavior of `CameraFragment` and `CameraView` was to show the entire
+preview, as supplied by the underlying `Camera` API. Since the aspect ratio of
+the preview frames may be different than the aspect ratio of the `CameraView`,
+this results in a "letterbox" effect, where the background will show through on
+one axis on the sides.
+
+The new default behavior is to completely fill the `CameraView`, at the cost of
+cropping off some of the actual preview frame, what is known as "full-bleed preview"
+(stealing some terminology from the world of print media).
+
+To control this behavior:
+
+- Have your `CameraHost`
+return `true` or `false` from `useFullBleedPreview()`
+
+- Or, call `useFullBleedPreview()`
+on your `SimpleCameraHost.Builder`, passing in a `boolean` value to use by default.
+
+Note that the pictures and videos taken by this library are unaffected by
+`useFullBleedPreview()`. Hence, if `useFullBleedPreview()` returns `true`, the
+picture or video may contain additional content on the edges that was not
+visible in the preview.
 
 ### Wrapping the Preview UI
 
@@ -274,7 +338,10 @@ By default, the result of taking a picture is to return the `CameraFragment`
 to preview mode, ready to take the next picture. If, instead, you only need
 the one picture, or you want to send the user to some other bit of UI first
 and do not want preview to start up again right away, override
-`useSingleShotMode()` in your `CameraHost` to return `true`.
+`useSingleShotMode()` in your `CameraHost` to return `true`. Or, call
+`useSingleShotMode()` on your `SimpleCameraHost.Builder`, passing in a `boolean` to
+use by default. Or, call `useSingleShotMode()` on your `PictureTransaction`,
+to control this for an individual picture.
 
 You will then
 probably want to use your own `saveImage()` implementation in your
@@ -345,6 +412,41 @@ with a `FailureReason` of `UNKNOWN`.
 While `SimpleCameraHost` has a trivial `onCameraFail()` implementation (just
 logging to LogCat), you are strongly encouraged to override this and inform
 your users of the problem.
+
+### Fixing Up Images... And Your Heap
+
+There are a few fixups that the library performs on your images, 
+to provide consistent output. The biggest one is to rotate the image
+to the proper orientation, rather than rely on EXIF headers, as not
+all image viewers use those headers.
+
+The problem is that these fixups take a lot of heap space. By default,
+the library will always try to perform these fixups, and for a
+high-resolution image on a low-memory device, an `OutOfMemoryError`
+may result.
+
+You have two means of managing this, and you are welcome to apply
+one or both of them:
+
+1. You can add `android:largeHeap="true"` to the `<application>`
+element of your manifest. On API Level 11+ devices, you will get
+more heap space, making it more likely that the fixup will
+succeed. However, this will hurt the user, in that your app will
+tend to kick other apps out of memory more quickly, which the user
+may not appreciate.
+
+2. Your `CameraHost` can return a value between `0.0f` and `1.0f`
+from `maxPictureCleanupHeapUsage()`. The default implementation
+on `SimpleCameraHost` returns `1.0f`, which says "the `byte[]`
+of image data from the camera can be as big as our heap limit,
+and we should still try to do the cleanup work". A value of `0.0f`
+would indicate that the cleanup work should never be done, and
+the images will be saved in their natural state. A value in
+between represents a portion of the heap space; if the `byte[]`
+is that size or smaller, go ahead and try to do the fixups. Note
+that this determination is made on the compressed JPEG `byte[]`
+length, not the size of the decoded `Bitmap`, and the JPEG may
+be compressed ~90% compared to its uncompressed size.
 
 Advanced Configuration
 ----------------------
@@ -471,59 +573,41 @@ implementations to do something else.
 
 The default `SimpleCameraHost` logic for saving photos uses the `getPhotoPath()` 
 and related methods discussed above. Actually saving the photo is done in
-`saveImage(byte[])`, called on your `CameraHost`, where `SimpleCameraHost` has a
-`saveImage(byte[])` implementation that writes the supplied `byte[]` out to the desired
+`saveImage(PictureTransaction, byte[])`, called on your `CameraHost`, where `SimpleCameraHost` has a
+`saveImage(PictureTransaction, byte[])` implementation that writes the supplied `byte[]` out to the desired
 location.
 
-You are welcome to override `saveImage(byte[])` and do something else with the `byte[]`, 
-such as send it over the Internet. `saveImage(byte[])` is called on a background thread,
+You are welcome to override `saveImage(PictureTransaction, byte[])` and do something else with the `byte[]`, 
+such as send it over the Internet. `saveImage(PictureTransaction, byte[])` is called on a background thread,
 so you do not have to do your own asynchronous work.
 
 Another use for this is to find out when the saving is complete, so that you can
-use the resulting image. Just override `saveImage(byte[])`, chain to the superclass
+use the resulting image. Just override `saveImage(PictureTransaction, byte[])`, chain to the superclass
 implementation, and when that returns, the image is ready for use.
 
-There is also a `saveImage(Bitmap)` callback, giving you a decoded `Bitmap`
-instead of a `byte[]`. To use this, there is a second version of `takePicture()`
-that you can call that takes two `boolean` parameters, indicating whether or
-not you want the `saveImage(Bitmap)` callback called and/or the
-`saveImage(byte[])` callback called. The zero-argument `takePicture()` indicates
-that you only want `saveImage(byte[])` called. If you pass `true` as the
-first parameter to the two-parameter `takePicture()` method, then your host
-will be called with `saveImage(Bitmap)`. Note that if you do this, you are
+There is also a `saveImage(PictureTransaction, Bitmap)` callback, giving you a decoded `Bitmap`
+instead of a `byte[]`.
+
+By default, `saveImage(PictureTransaction, byte[])` will be called, and not
+`saveImage(PictureTransaction, Bitmap)`. To change this, call `needBitmap(boolean)`
+and/or `needByteArray(boolean)` on your `PictureTransaction`, passing that
+`PictureTransaction` to `takePicture()`.
+
+Note that if you say that you need the `Bitmap`, you are
 responsible for the `Bitmap` (e.g., calling `recycle()` on it) once it is handed
 to your host.
 
 ### Controlling the Shutter Callback
 
-Your `CameraHost` implementation can return a `Camera.ShutterCallback` object
+You can subclass `PictureTransaction` and override `onShutter()` to
+do something when the shutter is pressed.
+
+Also,
+your `CameraHost` implementation can return a `Camera.ShutterCallback` object
 via `getShutterCallback()`,
 which will be used in the underlying `takePicture()` call on the Android `Camera`,
 giving you control to play a "shutter click" sound. `SimpleCameraHost` returns `null`
 from `getShutterCallback()`, to give you the device default behavior.
-
-### Controlling EXIF Rotation Behavior
-
-Device cameras are generally set up to take landscape pictures. If you try to use
-a camera to take a picture in portrait mode, one of three things will happen:
-
-1. Everything works fine, with the device capturing a portrait image
-
-2. The device crashes (this scenario CWAC-Camera aims to handle)
-
-3. The device captures a landscape image, but sets an EXIF header to indicate
-that an image viewer should rotate the image to portrait when displaying it
-
-The problem with the last scenario is that not all image viewers will honor
-this EXIF header.
-
-Your `CameraHost` will need to implement `rotateBasedOnExif()` to indicate
-if you want the library to rotate the image automatically. If you return
-`true`, you will get a portrait image from all devices, for all three
-of the above scenarios. If you return `false`, the last scenario will
-be ignored, and you may get a portrait or a landscape image.
-
-`SimpleCameraHost` returns `true` for `rotateBasedOnExif()`.
 
 ### Detecting Faces
 
@@ -571,23 +655,51 @@ with certain devices, you can detect those in your `getDeviceProfile()` method
 and return a `DeviceProfile` that addresses your needs, otherwise settling for
 using the library's own choice of `DeviceProfile`.
 
-At present, there are four methods on `DeviceProfile` that you can tailor
-in your subclasses:
+Note that `SimpleCameraHost.Builder` also has a `deviceProfile()` setter method that
+you can call, passing in a `DeviceProfile` that will be used as the default,
+replacing the system default.
 
-- `useTextureView()` should return `true` if `CameraView` should use a
-`TextureView` for rendering the preview frames, or `false` if a `SurfaceView`
-should be used instead
+The stock `DeviceProfile` is largely driven by XML resources. These
+resources' names are of the form `cwac_camera_profile_XXX_YYY`,
+where `XXX` is the `Build.MANUFACTURER` and `YYY` is the `Build.MODEL`.
+Both `Build.MANUFACTURER` and `BUILD.MODEL` are converted to lowercase
+and have non-alphanumeric values converted to underscores, to ensure
+that we wind up with a valid resource filename. Each of those
+XML resource files has a `<deviceProfile>` root element, containing
+child elements for different values that can be overridden:
 
-- `encodesRotationToExif()` indicates if the device puts information about
-the device orientation into EXIF headers of the JPEG image
+- `<doesZoomActuallyWork>` (a boolean, `true` or `false`) overrides
+the default zoom detection logic, with `false` meaning that the device
+lies and zoom is not really supported
 
-- `rotateBasedOnExif()` should return `true` if the library should attempt to
-physically change the orientation of the image if the EXIF orientation header
-indicates that the image should be changed, `false` otherwise
+- `<maxPictureHeight>` (an integer) is the largest number of pixels
+high to use for the camera picture; a `Camera.Size` taller than this
+is ignored
 
-- `getMaxPictureHeight()` returns the maximum image height to be selected
-by `CameraUtils.getLargestPictureSize()`, to work around devices that report
-invalid large `Camera.Size` values
+- `<minPictureHeight>` (an integer) is the smallest number of pixels
+high to use for the camera picture; a `Camera.Size` shorter than this
+is ignored
+
+- `<pictureDelay>` (an integer) is a time in milliseconds to delay
+taking the picture after updating `Camera.Parameters` with the picture
+settings, for devices that seem to reset themselves when the parameters
+are updated, resulting in messed-up pictures
+
+- `<portraitFFCFlipped>` (a boolean, `true` or `false`) indicates if
+the image cleanup work needs to flip the image if it was taken in
+portrait mode from the front-facing camera
+
+- `<useDeviceOrientation>` (a boolean, `true` or `false`) indicates
+if we should skip the `setRotation()` call on `Camera.Parameters`
+due to a device bug, and instead should just use physical orientation
+in the image cleanup phase to get the picture to turn out right
+
+- `<useTextureView>` (a boolean, `true` or `false`) overrides the
+default choice of whether to use a `SurfaceView` or a `TextureView`
+for the preview, normally driven by API level
+
+So long as the resource exists with the right filename, the
+library should pick it up, so you can add ones in your app if needed.
 
 ### Working Directly with CameraView
 
@@ -626,12 +738,22 @@ the `CameraView` instance to the superclass.
 The `demo-layout/` directory contains a small sample project that demonstrates
 this technique.
 
-## Miscellaneous
+### Flash Modes
 
 `CameraView`, as well as `CameraFragment`, has a `getFlashMode()` which
-returns the flash mode from `Camera.Parameters`. If you wish to change
-the flash mode, please do so in `adjustPictureParameters()` and/or
-`adjustPreviewParameters()`.
+returns the flash mode from `Camera.Parameters`.
+
+To adjust the flash mode, you can call `flashMode()` on your `PictureTransaction`
+to specify a mode to apply when the picture is taken. Or, call `setFlashMode()`
+on `CameraView` or `CameraFragment` when needed. Or,
+you can manually configure the `Camera.Parameters` object in `adjustPictureParameters()`
+and/or `adjustPreviewParameters()`.
+
+The `CameraUtils` class has a `findBestFlashModeMatch()` method that
+takes a `Camera.Parameters` object, plus one or more `String` names
+of flash modes (e.g., `Camera.Parameters.FLASH_MODE_ON`), and returns
+the mode that appears first in your list of strings that is supported
+by the current camera.
 
 Third-Party Code
 ----------------
@@ -651,20 +773,12 @@ output should be rotated. Unfortunately, many video players ignore this header.
 This is a function of how `MediaRecorder` works, and there is no current
 workaround in `CWAC-Camera` for this behavior.
 
-2. Taking photos in portrait mode, for some devices, will have a similar
-effect: the photo is saved in landscape, with an EXIF field in the JPEG indicating
-that the results should be rotated. `CWAC-Camera` detects this and tries to
-correct it, so the image is saved in portrait. However, this may consume too
-much memory at present, which is why Step #4 above calls for you to add
-`android:largeHeap="true"`. This will hopefully be rectified in a future
-version of this component.
-
-3. While a picture or video is being taken, on some devices, the aspect
+2. While a picture or video is being taken, on some devices, the aspect
 ratio of the preview gets messed up. The aspect ratio is corrected by `CWAC-Camera`
 once the picture or video is completed, but more work is needed to try to prevent
 this in the first place, or at least mask it a bit better for photos.
 
-4. The Samsung Galaxy Ace refuses to honor a portrait preview in an activity
+3. The Samsung Galaxy Ace refuses to honor a portrait preview in an activity
 that itself supports portrait or landscape. If you lock your activity to only
 display in landscape, the Galaxy Ace will probably work.
 
@@ -672,6 +786,31 @@ Upgrading
 ---------
 If you are moving from an older to a newer edition of CWAC-Camera, here are some
 upgrade notes which may help.
+
+### From 0.5.x to 0.6.0 and Higher
+
+If you implemented `CameraHost` or extended `SimpleCameraHost`, note that four
+callback methods now receive a `PictureTransaction` as the first parameter:
+
+- `adjustPictureParameters(PictureTransaction xact, Camera.Parameters parameters)`
+- `getPictureSize(PictureTransaction xact, Camera.Parameters parameters)`
+- `saveImage(PictureTransaction xact, Bitmap bitmap)`
+- `saveImage(PictureTransaction xact, byte[] image)`
+
+Conversely, all of the old EXIF-related behaviors are now gone. If
+you created custom `DeviceProfiles`, they will need to be adjusted
+to remove the `encodesRotationToExif()` and `rotateBasedOnExif()`
+methods. Also, any custom `CameraHost` implementation will need to
+have its `rotateBasedOnExif()` method removed.
+
+If you implemented your own `DeviceProfile` classes, note that they might
+now be able to be replaced by XML resources instead.
+
+Taking pictures now involves a `PictureTransaction`, though the existing
+`takePicture()` methods are still supported.
+
+Also note that full-bleed previews are now the default, though you can
+override that to revert back to the original behavior if desired.
 
 ### From 0.4.x to 0.5.0 and Higher
 
@@ -714,40 +853,43 @@ Tested Devices
 --------------
 The columns indicate what version of the library that the various devices have
 been tested on. The numbers in the columns indicate the Android OS version the
-device was running (note: not shown for 0.4.x).
+device was running. The Info column contains the `Build.MANUFACTURER`
+and `Build.PRODUCT` values for the device.
 
-| Device                              | 0.4.x | 0.5.0 | Issues |
-| ----------------------------------- |:-----:|:-----:|:------:|
-| Acer Iconia Tab A700                | X     | 4.1.1 |        |
-| Amazon Kindle Fire HD               | X     | 4.0.4 |        |
-| Amazon Kindle Fire HDX 8.9          |       | 4.2.2 | [75](https://github.com/commonsguy/cwac-camera/issues/75)     |
-| ASUS MEMO Pad FHD 10                | X     | 4.2.2 |        |
-| ASUS Transformer Infinity (TF700)   | X     | 4.2.1 |        |
-| Galaxy Nexus                        | X     | 4.3   |        |
-| HTC Droid Incredible 2              | X     | 2.3.4 |        |
-| HTC One S                           | X     | 4.1.1 | [76](https://github.com/commonsguy/cwac-camera/issues/76)    |
-| Lenovo ThinkPad Tablet              | X     | 4.0.3 | [38](https://github.com/commonsguy/cwac-camera/issues/38)    |
-| Nexus 4                             | X     | 4.4   |        |
-| Nexus 5                             | X     | 4.4   |        |
-| Nexus 7 (2012)                      | X     | 4.4   | [72](https://github.com/commonsguy/cwac-camera/issues/72) [73](https://github.com/commonsguy/cwac-camera/issues/73) |
-| Nexus 7 (2013)                      | X     | 4.4   | [70](https://github.com/commonsguy/cwac-camera/issues/70)     |
-| Nexus 10                            | X     | 4.4   |        |
-| Nexus One                           | X     | 2.3.6 |        |
-| Nexus S                             | X     | 4.1.2 |        |
-| Motorola RAZR i                     | X     | 4.1.2 |        |
-| Samsung Galaxy Ace (GT-S5830M)      | X     | 2.3.6 |        |
-| Samsung Galaxy Grand (GT-I9090L)    | X     | 4.1.2 |        |
-| Samsung Galaxy Note 2 (GT-N7100)    | X     | 4.1.2 | [19](https://github.com/commonsguy/cwac-camera/issues/19)     |
-| Samsung Galaxy S3                   | X     | 4.1.2 | [77](https://github.com/commonsguy/cwac-camera/issues/77)     |
-| Samsung Galaxy S4 (GT-I9500)        | X     | 4.3   |        |
-| Samsung Galaxy S4 (SGH-I337)        | X     | 4.2.2 |        |
-| Samsung Galaxy Tab 2 7.0 (GT-P3113) | X     | 4.2.2 |        |
-| Samsung Galaxy Tab 10.1 (GT-P7510)  |       | 3.0.1 |        |
-| SONY Ericsson Xperia Play           | X     | 2.3.6 |        |
-| SONY Xperia E                       | X     | 4.1.1 | [45](https://github.com/commonsguy/cwac-camera/issues/45)     |
-| SONY Xperia S LT26i                 | X     | 4.1.2 |        |
-| SONY Xperia Z                       | X     | 4.2.2 |        |
-| SONY Xperia Z Ultra                 |       | 4.2.2 |        |
+| Device                              | Info                            | 0.5.0 | 0.6.0 | Issues |
+| ----------------------------------- |:-------------------------------:|:-----:|:-----:|:------:|
+| Acer Iconia Tab A700                |`Acer`/`a700_pa_cus1`            | 4.1.1 | 4.1.1 ||
+| Amazon Kindle Fire HD               |`Amazon`/`Kindle Fire`           | 4.0.4 | 4.0.4 | [107](https://github.com/commonsguy/cwac-camera/issues/107) |
+| Amazon Kindle Fire HDX 8.9          |`Amazon`/`apollo`                | 4.2.2 | 4.2.2 | [75](https://github.com/commonsguy/cwac-camera/issues/75)     |
+| ASUS MEMO Pad FHD 10                |`asus`/`US_epad`                 | 4.2.2 | 4.3   ||
+| ASUS Transformer Infinity (TF700)   |`asus`/`US_epad`                 | 4.2.1 | 4.2.1 ||
+| Galaxy Nexus                        |`samsung`/`yakju`                | 4.3   | 4.3   ||
+| Google Nexus 4                      |`LGE`/`occam`                    | 4.4   | 4.4.2 ||
+| Google Nexus 5                      |`LGE`/`hammerhead`               | 4.4   | 4.4.2 ||
+| Google Nexus 7 (2012)               |`asus`/`nakasi`                  | 4.4   | 4.4.2 | [72](https://github.com/commonsguy/cwac-camera/issues/72) |
+| Google Nexus 7 (2013)               |`asus`/`razor`                   | 4.4   | 4.4.2 ||
+| Google Nexus 10                     |`samsung`/`mantaray`             | 4.4   | 4.4.2 ||
+| Google Nexus One                    | ???                             | 2.3.6 | 2.3.6 ||
+| Google Nexus S                      |`samsung`/`soju`                 | 4.1.2 | 4.1.2 ||
+| HTC Droid Incredible 2              | ???                             | 2.3.4 | 2.3.4 ||
+| HTC One S                           |`HTC`/`ville`                    | 4.1.1 | 4.1.1 | [76](https://github.com/commonsguy/cwac-camera/issues/76)    |
+| Lenovo ThinkPad Tablet              |`LENOVO`/`ThinkPadTablet`        | 4.0.3 | 4.0.3 | [38](https://github.com/commonsguy/cwac-camera/issues/38) [111](https://github.com/commonsguy/cwac-camera/issues/111) |
+| LG G2 (LG-D802)                     |`LGE`/`g2_open_com`              |       | 4.2.2 ||
+| Motorola RAZR i                     |`motorola`/`XT890_rtgb`          | 4.1.2 | 4.1.2 ||
+| Samsung Galaxy Ace (GT-S5830M)      | ???                             | 2.3.6 | 2.3.6 ||
+| Samsung Galaxy Ace 3 (GT-S7270L)    |`samsung`/`loganub`              |       | 4.2.2 | [92](https://github.com/commonsguy/cwac-camera/issues/92) |
+| Samsung Galaxy Camera (EK-GC110)    |`samsung`/`gd1wifiue`            |       | 4.1.2 | [105](https://github.com/commonsguy/cwac-camera/issues/105) |
+| Samsung Galaxy Grand (GT-I9090L)    |`samsung`/`baffinssvj`           | 4.1.2 | 4.2.2 ||
+| Samsung Galaxy Note 2 (GT-N7100)    |`samsung`/`t03gxx`               | 4.1.2 | 4.1.2 | [19](https://github.com/commonsguy/cwac-camera/issues/19)     |
+| Samsung Galaxy S3 (GT-I9300)        |`samsung`/`m0xx`                 | 4.1.2 | 4.3   | [77](https://github.com/commonsguy/cwac-camera/issues/77)     |
+| Samsung Galaxy S4 (GT-I9500)        |`samsung`/`ja3gxx`               | 4.3   | 4.3   ||
+| Samsung Galaxy S4 (SGH-I337)        |`samsung`/`jflteuc`              | 4.2.2 | 4.2.2 ||
+| Samsung Galaxy Tab 2 7.0 (GT-P3113) |`samsung`/`espressowifiue`       | 4.2.2 | 4.2.2 | [107](https://github.com/commonsguy/cwac-camera/issues/107)|
+| SONY Ericsson Xperia Play           | ???                             | 2.3.6 | 2.3.6 | [113](https://github.com/commonsguy/cwac-camera/issues/113) |
+| SONY Xperia E                       |`Sony`/`C1505_1270-4354`         | 4.1.1 | 4.1.1 | [45](https://github.com/commonsguy/cwac-camera/issues/45)     |
+| SONY Xperia S LT26i                 |`Sony Ericsson`/`LT26i_1257-4921`| 4.1.2 |       |
+| SONY Xperia Z                       |`Sony`/`C6603_1270-7689`         | 4.2.2 | 4.3   ||
+| SONY Xperia Z Ultra                 |`Sony`/`C6802`                   | 4.2.2 | 4.3   ||
 
 Dependencies
 ------------
@@ -797,6 +939,7 @@ the fence may work, but it may not.
 
 Release Notes
 -------------
+- v0.6.0: full-bleed preview, faster image processing, `DeviceProfile` overhaul, added `PictureTransaction`, etc.
 - v0.5.4: refactored into two libraries, added Gradle support and AAR artifacts
 - v0.5.2: face detection, zoom, and demo bug fixes
 - v0.5.1: added face detection support

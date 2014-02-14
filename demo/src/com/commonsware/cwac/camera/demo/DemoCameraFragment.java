@@ -70,10 +70,7 @@ public class DemoCameraFragment extends CameraFragment implements
     SimpleCameraHost.Builder builder=
         new SimpleCameraHost.Builder(new DemoCameraHost(getActivity()));
 
-    // other builder configuration would go here, for things
-    // that are static for the lifetime of the host instance
-
-    setHost(builder.build());
+    setHost(builder.useFullBleedPreview(true).build());
   }
 
   @Override

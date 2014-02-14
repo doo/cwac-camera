@@ -111,7 +111,8 @@ public class CameraUtils {
     return(optimalSize);
   }
 
-  public static Camera.Size getLargestPictureSize(Camera.Parameters parameters) {
+  public static Camera.Size getLargestPictureSize(CameraHost host,
+                                                  Camera.Parameters parameters) {
     Camera.Size result=null;
 
     for (Camera.Size size : parameters.getSupportedPictureSizes()) {
@@ -119,10 +120,9 @@ public class CameraUtils {
       // android.util.Log.d("CWAC-Camera",
       // String.format("%d x %d", size.width, size.height));
 
-      if (size.height <= DeviceProfile.getInstance()
-                                      .getMaxPictureHeight()
-          && size.height >= DeviceProfile.getInstance()
-                                         .getMinPictureHeight()) {
+      if (size.height <= host.getDeviceProfile().getMaxPictureHeight()
+          && size.height >= host.getDeviceProfile()
+                                .getMinPictureHeight()) {
         if (result == null) {
           result=size;
         }

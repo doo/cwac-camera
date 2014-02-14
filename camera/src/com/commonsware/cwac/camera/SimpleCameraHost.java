@@ -41,10 +41,9 @@ public class SimpleCameraHost implements CameraHost {
   private File videoDirectory=null;
   private RecordingHint recordingHint=null;
   private boolean mirrorFFC=false;
-  private boolean rotateBasedOnExif=true;
   private boolean useFrontFacingCamera=false;
   private boolean scanSavedImage=true;
-  private boolean useFullBleedPreview=false;
+  private boolean useFullBleedPreview=true;
   private boolean useSingleShotMode=false;
 
   public SimpleCameraHost(Context _ctxt) {
@@ -136,20 +135,20 @@ public class SimpleCameraHost implements CameraHost {
   @Override
   public DeviceProfile getDeviceProfile() {
     if (profile == null) {
-      initDeviceProfile();
+      initDeviceProfile(ctxt);
     }
 
     return(profile);
   }
 
-  private void initDeviceProfile() {
-    profile=DeviceProfile.getInstance();
+  private void initDeviceProfile(Context ctxt) {
+    profile=DeviceProfile.getInstance(ctxt);
   }
 
   @Override
   public Camera.Size getPictureSize(PictureTransaction xact,
                                     Camera.Parameters parameters) {
-    return(CameraUtils.getLargestPictureSize(parameters));
+    return(CameraUtils.getLargestPictureSize(this, parameters));
   }
 
   @Override
@@ -386,12 +385,6 @@ public class SimpleCameraHost implements CameraHost {
 
     public Builder recordingHint(RecordingHint recordingHint) {
       host.recordingHint=recordingHint;
-
-      return(this);
-    }
-
-    public Builder rotateBasedOnExif(boolean rotateBasedOnExif) {
-      host.rotateBasedOnExif=rotateBasedOnExif;
 
       return(this);
     }

@@ -1,3 +1,17 @@
+/***
+  Copyright (c) 2013-2014 CommonsWare, LLC
+  
+  Licensed under the Apache License, Version 2.0 (the "License"); you may
+  not use this file except in compliance with the License. You may obtain
+  a copy of the License at
+    http://www.apache.org/licenses/LICENSE-2.0
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+ */
+
 package com.commonsware.cwac.camera;
 
 import android.annotation.TargetApi;
@@ -10,13 +24,9 @@ import android.graphics.Matrix;
 import android.hardware.Camera;
 import android.os.Build;
 import android.util.Log;
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import com.drew.imaging.ImageMetadataReader;
-import com.drew.metadata.Metadata;
-import com.drew.metadata.exif.ExifIFD0Directory;
+import com.android.mms.exif.ExifInterface;
 
 public class ImageCleanupTask extends Thread {
   private byte[] data;
@@ -43,6 +53,7 @@ public class ImageCleanupTask extends Thread {
 
     Matrix matrix=null;
     Bitmap cleaned=null;
+    ExifInterface exif=null;
 
     if (applyMatrix) {
       if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
@@ -56,37 +67,40 @@ public class ImageCleanupTask extends Thread {
       }
 
       try {
-        Metadata md=
-            ImageMetadataReader.readMetadata(new BufferedInputStream(
-                                                                     new ByteArrayInputStream(
-                                                                                              data)),
-                                             true);
-        ExifIFD0Directory exifDir=
-            md.getDirectory(ExifIFD0Directory.class);
-        int exifOrientation=0;
+        int imageOrientation=0;
 
-        if (exifDir.containsTag(ExifIFD0Directory.TAG_ORIENTATION)) {
-          exifOrientation=
-              exifDir.getInt(ExifIFD0Directory.TAG_ORIENTATION);
-        }
-
-        int imageOrientation;
-
-        if (exifOrientation == 6) {
-          imageOrientation=90;
-        }
-        else if (exifOrientation == 8) {
-          imageOrientation=270;
-        }
-        else if (exifOrientation == 3) {
-          imageOrientation=180;
-        }
-        else if (exifOrientation == 1) {
-          imageOrientation=0;
+        if (xact.host.getDeviceProfile().useDeviceOrientation()) {
+          imageOrientation=xact.displayOrientation;
         }
         else {
-          imageOrientation=
-              xact.host.getDeviceProfile().getDefaultOrientation();
+          exif=new ExifInterface();
+          exif.readExif(data);
+
+          Integer exifOrientation=
+              exif.getTagIntValue(ExifInterface.TAG_ORIENTATION);
+
+          if (exifOrientation != null) {
+            if (exifOrientation == 6) {
+              imageOrientation=90;
+            }
+            else if (exifOrientation == 8) {
+              imageOrientation=270;
+            }
+            else if (exifOrientation == 3) {
+              imageOrientation=180;
+            }
+            else if (exifOrientation == 1) {
+              imageOrientation=0;
+            }
+            else {
+              // imageOrientation=
+              // xact.host.getDeviceProfile().getDefaultOrientation();
+              //
+              // if (imageOrientation == -1) {
+              // imageOrientation=xact.displayOrientation;
+              // }
+            }
+          }
         }
 
         if (imageOrientation != 0) {
@@ -95,9 +109,9 @@ public class ImageCleanupTask extends Thread {
                      imageOrientation);
         }
       }
-      catch (Exception e) {
-        Log.w(getClass().getSimpleName(),
-              "Exception parsing JPEG byte array", e);
+      catch (IOException e) {
+        Log.e("CWAC-Camera", "Exception parsing JPEG", e);
+        // TODO: ripple to client
       }
 
       if (matrix != null) {
@@ -121,11 +135,24 @@ public class ImageCleanupTask extends Thread {
 
     if (xact.needByteArray) {
       if (matrix != null) {
-        ByteArrayOutputStream out=
-            new ByteArrayOutputStream(cleaned.getWidth()
-                * cleaned.getHeight());
+        ByteArrayOutputStream out=new ByteArrayOutputStream();
 
+        // if (exif == null) {
         cleaned.compress(Bitmap.CompressFormat.JPEG, 100, out);
+        // }
+        // else {
+        // exif.deleteTag(ExifInterface.TAG_ORIENTATION);
+        //
+        // try {
+        // exif.writeExif(cleaned, out);
+        // }
+        // catch (IOException e) {
+        // Log.e("CWAC-Camera", "Exception writing to JPEG",
+        // e);
+        // // TODO: ripple to client
+        // }
+        // }
+
         data=out.toByteArray();
 
         try {

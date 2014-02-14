@@ -16,7 +16,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.commonsware.cwac:camera:0.5.4'
+    compile 'com.commonsware.cwac:camera:0.6.+'
 }
 
 android {
