@@ -50,6 +50,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
   private boolean isDetectingFaces=false;
   private boolean isAutoFocusing=false;
   private int lastPictureOrientation=-1;
+  private Camera.PreviewCallback previewCallback;
 
   public CameraView(Context context) {
     super(context);
@@ -131,9 +132,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
             camera.setFaceDetectionListener((Camera.FaceDetectionListener)getHost());
           }
 
-          if (getHost() instanceof Camera.PreviewCallback) {
-            camera.setPreviewCallback((Camera.PreviewCallback)getHost());
-          }
+          camera.setPreviewCallback(previewCallback);
         }
         catch (Exception e) {
           getHost().onCameraFail(FailureReason.UNKNOWN);
@@ -147,7 +146,6 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
 
   public void onPause() {
     if (camera != null) {
-      camera.setPreviewCallback(null);
       previewDestroyed();
       removeView(previewStrategy.getWidget());
     }
@@ -473,6 +471,13 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
       camera.stopFaceDetection();
       isDetectingFaces=false;
     }
+  }
+
+  public void setPreviewCallback(Camera.PreviewCallback callback) {
+      previewCallback = callback;
+      if (camera != null) {
+          camera.setPreviewCallback(callback);
+      }
   }
 
   public boolean doesZoomReallyWork() {
