@@ -83,7 +83,8 @@ public class DemoCameraFragment extends CameraFragment implements
 
     ((ViewGroup)results.findViewById(R.id.camera)).addView(cameraView);
     zoom=(SeekBar)results.findViewById(R.id.zoom);
-
+    zoom.setKeepScreenOn(true);
+    
     return(results);
   }
 
