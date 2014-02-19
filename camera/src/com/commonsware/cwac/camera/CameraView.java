@@ -146,6 +146,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
 
   public void onPause() {
     if (camera != null) {
+      camera.setPreviewCallback(null);
       previewDestroyed();
       removeView(previewStrategy.getWidget());
     }
@@ -474,10 +475,14 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
   }
 
   public void setPreviewCallback(Camera.PreviewCallback callback) {
-      previewCallback = callback;
-      if (camera != null) {
-          camera.setPreviewCallback(callback);
+    previewCallback = callback;
+    if (camera != null) {
+      try {
+        camera.setPreviewCallback(callback);
+      } catch (RuntimeException e) {
+        e.printStackTrace();
       }
+    }
   }
 
   public boolean doesZoomReallyWork() {
