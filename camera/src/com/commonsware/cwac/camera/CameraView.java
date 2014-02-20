@@ -132,7 +132,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
             camera.setFaceDetectionListener((Camera.FaceDetectionListener)getHost());
           }
 
-          camera.setPreviewCallback(previewCallback);
+          camera.setPreviewCallbackWithBuffer(previewCallback);
         }
         catch (Exception e) {
           getHost().onCameraFail(FailureReason.UNKNOWN);
@@ -478,10 +478,16 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
     previewCallback = callback;
     if (camera != null) {
       try {
-        camera.setPreviewCallback(callback);
+        camera.setPreviewCallbackWithBuffer(callback);
       } catch (RuntimeException e) {
         e.printStackTrace();
       }
+    }
+  }
+
+  public void addPreviewCallbackBuffer(byte[] buffer) {
+    if (camera != null) {
+      camera.addCallbackBuffer(buffer);
     }
   }
 
