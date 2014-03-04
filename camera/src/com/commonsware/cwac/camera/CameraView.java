@@ -150,6 +150,8 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
       previewDestroyed();
       removeView(previewStrategy.getWidget());
     }
+
+    lastPictureOrientation=-1;
   }
 
   // based on CameraPreview.java from ApiDemos
@@ -182,12 +184,12 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
                                                           camera.getParameters(),
                                                           null);
 
-//            if (newSize != null) {
-//              android.util.Log.wtf("CameraView",
-//                                   String.format("getPreferredPreviewSizeForVideo: %d x %d",
-//                                                 newSize.width,
-//                                                 newSize.height));
-//            }
+            // if (newSize != null) {
+            // android.util.Log.wtf("CameraView",
+            // String.format("getPreferredPreviewSizeForVideo: %d x %d",
+            // newSize.width,
+            // newSize.height));
+            // }
           }
 
           if (newSize == null || newSize.width * newSize.height < 65536) {
@@ -284,13 +286,6 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
       getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
       onOrientationChange.disable();
     }
-
-    post(new Runnable() {
-      @Override
-      public void run() {
-        setCameraDisplayOrientation();
-      }
-    });
   }
 
   public void restartPreview() {
@@ -359,6 +354,11 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
                                               "Video recording supported only on API Level 11+");
     }
 
+    if (displayOrientation != 0 && displayOrientation != 180) {
+      throw new UnsupportedOperationException(
+                                              "Video recording supported only in landscape");
+    }
+
     Camera.Parameters pictureParams=camera.getParameters();
 
     setCameraPictureOrientation(pictureParams);
@@ -398,6 +398,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
     tempRecorder.stop();
     tempRecorder.release();
     camera.reconnect();
+    startPreview();
   }
 
   public void autoFocus() {

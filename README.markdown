@@ -36,7 +36,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.commonsware.cwac:camera:0.6.2'
+    compile 'com.commonsware.cwac:camera:0.6.+'
 }
 ```
 
@@ -53,7 +53,7 @@ repositories {
 }
 
 dependencies {
-    compile('com.commonsware.cwac:camera-v9:0.6.2') {
+    compile('com.commonsware.cwac:camera-v9:0.6.+') {
       exclude module: 'support-v4'
     }
 
@@ -901,7 +901,7 @@ if you are using the `.acl` flavor of `CameraFragment`.
 
 Version
 -------
-This is version v0.6.2 of this module, meaning it is coming along nicely.
+This is version v0.6.3 of this module, meaning it is coming along nicely.
 
 Demo
 ----
@@ -939,6 +939,7 @@ the fence may work, but it may not.
 
 Release Notes
 -------------
+- v0.6.3: various bug fixes
 - v0.6.2: synchronized the -v9 `CameraFragment` with the main one
 - v0.6.1: fixed issue with Motorola device support
 - v0.6.0: full-bleed preview, faster image processing, `DeviceProfile` overhaul, added `PictureTransaction`, etc.
