@@ -408,7 +408,9 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
     }
 
     public void cancelAutoFocus() {
-        camera.cancelAutoFocus();
+        if (camera != null) {
+            camera.cancelAutoFocus();
+        }
     }
 
     public boolean isAutoFocusAvailable() {
