@@ -49,7 +49,6 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
     private Camera.Parameters previewParams=null;
     private boolean isDetectingFaces=false;
     private boolean isAutoFocusing=false;
-    private int lastPictureOrientation=-1;
     private Camera.PreviewCallback previewCallback;
 
     public CameraView(Context context) {
@@ -633,10 +632,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
             outputOrientation=displayOrientation;
         }
 
-        if (lastPictureOrientation != outputOrientation) {
-            params.setRotation(outputOrientation);
-            lastPictureOrientation=outputOrientation;
-        }
+        params.setRotation(outputOrientation);
     }
 
     // based on:
@@ -681,7 +677,6 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
 
                     params.setRotation(outputOrientation);
                     camera.setParameters(params);
-                    lastPictureOrientation=outputOrientation;
                 }
             }
         }
