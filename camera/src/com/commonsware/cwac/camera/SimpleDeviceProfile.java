@@ -14,8 +14,10 @@
 
 package com.commonsware.cwac.camera;
 
+import android.annotation.SuppressLint;
 import android.os.Build;
 import android.util.Log;
+import com.commonsware.cwac.camera.CameraHost.RecordingHint;
 import org.xmlpull.v1.XmlPullParser;
 
 public class SimpleDeviceProfile extends DeviceProfile {
@@ -29,6 +31,7 @@ public class SimpleDeviceProfile extends DeviceProfile {
   private int defaultOrientation=-1;
   private boolean useDeviceOrientation=false;
   private int pictureDelay=0;
+  private RecordingHint recordingHint=RecordingHint.NONE;
 
   SimpleDeviceProfile load(XmlPullParser xpp) {
     StringBuilder buf=null;
@@ -65,6 +68,7 @@ public class SimpleDeviceProfile extends DeviceProfile {
     return(this);
   }
 
+  @SuppressLint("DefaultLocale")
   private void set(String name, String value) {
     if ("useTextureView".equals(name)) {
       useTextureView=Boolean.parseBoolean(value);
@@ -89,6 +93,19 @@ public class SimpleDeviceProfile extends DeviceProfile {
 //    }
     else if ("pictureDelay".equals(name)) {
       pictureDelay=Integer.parseInt(value);
+    }
+    else if ("recordingHint".equals(name)) {
+      String hint=value.toUpperCase();
+      
+      if ("ANY".equals(hint)) {
+        recordingHint=RecordingHint.ANY;
+      }
+      else if ("STILL_ONLY".equals(hint)) {
+        recordingHint=RecordingHint.STILL_ONLY;
+      }
+      else if ("VIDEO_ONLY".equals(hint)) {
+        recordingHint=RecordingHint.VIDEO_ONLY;
+      }
     }
   }
 
@@ -140,6 +157,11 @@ public class SimpleDeviceProfile extends DeviceProfile {
   @Override
   public int getPictureDelay() {
     return(pictureDelay);
+  }
+  
+  @Override
+  public RecordingHint getDefaultRecordingHint() {
+    return(recordingHint);
   }
 
   // based on http://stackoverflow.com/a/9801191/115145

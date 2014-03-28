@@ -3,7 +3,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.8.+'
+        classpath 'com.android.tools.build:gradle:0.9.0'
         classpath 'com.github.dcendents:android-maven-plugin:1.0'
     }
 }
@@ -11,7 +11,7 @@ buildscript {
 apply plugin: 'android-library'
 apply plugin: 'android-maven'
 
-version '0.6.3'
+version '0.6.4'
 group 'com.commonsware.cwac'
 
 repositories {

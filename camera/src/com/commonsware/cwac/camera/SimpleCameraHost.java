@@ -261,7 +261,11 @@ public class SimpleCameraHost implements CameraHost {
   }
 
   private void initRecordingHint() {
-    recordingHint=RecordingHint.ANY;
+    recordingHint=profile.getDefaultRecordingHint();
+    
+    if (recordingHint==RecordingHint.NONE) {
+      recordingHint=RecordingHint.ANY;
+    }
   }
 
   @Override

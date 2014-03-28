@@ -18,6 +18,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.os.Build;
 import java.util.Locale;
+import com.commonsware.cwac.camera.CameraHost.RecordingHint;
 
 abstract public class DeviceProfile {
   abstract public boolean useTextureView();
@@ -35,14 +36,16 @@ abstract public class DeviceProfile {
   abstract public boolean useDeviceOrientation();
 
   abstract public int getPictureDelay();
+  
+  abstract public RecordingHint getDefaultRecordingHint();
 
   private static volatile DeviceProfile SINGLETON=null;
 
   synchronized public static DeviceProfile getInstance(Context ctxt) {
     if (SINGLETON == null) {
-      // android.util.Log.wtf("DeviceProfile",
-      // String.format("\"%s\" \"%s\"", Build.MANUFACTURER,
-      // Build.PRODUCT));
+//       android.util.Log.wtf("DeviceProfile",
+//       String.format("\"%s\" \"%s\"", Build.MANUFACTURER,
+//       Build.PRODUCT));
 
       if ("motorola".equalsIgnoreCase(Build.MANUFACTURER)
           && "XT890_rtgb".equals(Build.PRODUCT)) {

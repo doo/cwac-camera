@@ -177,7 +177,7 @@ to `setHost()` on your `CameraFragment`, to replace the default.
 just after instantiating your fragment) to ensure that the
 right `CameraHost` is used everywhere.
 
-### PictureTransaction and VideoTransaction
+### PictureTransaction
 
 The `takePicture()` method has a zero-argument version that just takes a picture.
 It also has a one-argument version, where the argument is an instance of
@@ -698,6 +698,11 @@ in the image cleanup phase to get the picture to turn out right
 default choice of whether to use a `SurfaceView` or a `TextureView`
 for the preview, normally driven by API level
 
+- `<recordingHint>` (`ANY`, `STILL_ONLY`, `VIDEO_ONLY`) indicates whether
+we should use a specific type of preview and image capture, based upon
+the intended use of the `Camera` (this exists solely to work around
+some device bugs)
+
 So long as the resource exists with the right filename, the
 library should pick it up, so you can add ones in your app if needed.
 
@@ -767,11 +772,7 @@ Known Limitations
 -----------------
 These are above and beyond [the bugs filed for this project](https://github.com/commonsguy/cwac-camera/issues):
 
-1. Taking videos in portrait mode will result in the video files still being
-stored as landscape, but with a bit in the MPEG-4 header indicating that the
-output should be rotated. Unfortunately, many video players ignore this header.
-This is a function of how `MediaRecorder` works, and there is no current
-workaround in `CWAC-Camera` for this behavior.
+1. Taking videos in portrait mode is not supported.
 
 2. While a picture or video is being taken, on some devices, the aspect
 ratio of the preview gets messed up. The aspect ratio is corrected by `CWAC-Camera`
@@ -875,12 +876,14 @@ and `Build.PRODUCT` values for the device.
 | HTC One S                           |`HTC`/`ville`                    | 4.1.1 | 4.1.1 | [76](https://github.com/commonsguy/cwac-camera/issues/76)    |
 | Lenovo ThinkPad Tablet              |`LENOVO`/`ThinkPadTablet`        | 4.0.3 | 4.0.3 | [38](https://github.com/commonsguy/cwac-camera/issues/38) [111](https://github.com/commonsguy/cwac-camera/issues/111) |
 | LG G2 (LG-D802)                     |`LGE`/`g2_open_com`              |       | 4.2.2 ||
+| LG G Pad 8.3 (LG-V510)              | ???                             |       | 4.4.2 ||
 | Motorola RAZR i                     |`motorola`/`XT890_rtgb`          | 4.1.2 | 4.1.2 ||
 | Samsung Galaxy Ace (GT-S5830M)      | ???                             | 2.3.6 | 2.3.6 ||
 | Samsung Galaxy Ace 3 (GT-S7270L)    |`samsung`/`loganub`              |       | 4.2.2 | [92](https://github.com/commonsguy/cwac-camera/issues/92) |
 | Samsung Galaxy Camera (EK-GC110)    |`samsung`/`gd1wifiue`            |       | 4.1.2 | [105](https://github.com/commonsguy/cwac-camera/issues/105) |
 | Samsung Galaxy Grand (GT-I9090L)    |`samsung`/`baffinssvj`           | 4.1.2 | 4.2.2 ||
 | Samsung Galaxy Note 2 (GT-N7100)    |`samsung`/`t03gxx`               | 4.1.2 | 4.1.2 | [19](https://github.com/commonsguy/cwac-camera/issues/19)     |
+| Samsung Galaxy Pocket Neo (GT-S5312)|`samsung`/`corsicadd`            |       | 4.1.2 ||
 | Samsung Galaxy S3 (GT-I9300)        |`samsung`/`m0xx`                 | 4.1.2 | 4.3   | [77](https://github.com/commonsguy/cwac-camera/issues/77)     |
 | Samsung Galaxy S4 (GT-I9500)        |`samsung`/`ja3gxx`               | 4.3   | 4.3   ||
 | Samsung Galaxy S4 (SGH-I337)        |`samsung`/`jflteuc`              | 4.2.2 | 4.2.2 ||
@@ -901,7 +904,7 @@ if you are using the `.acl` flavor of `CameraFragment`.
 
 Version
 -------
-This is version v0.6.3 of this module, meaning it is coming along nicely.
+This is version v0.6.4 of this module, meaning it is coming along nicely.
 
 Demo
 ----
@@ -939,6 +942,7 @@ the fence may work, but it may not.
 
 Release Notes
 -------------
+- v0.6.4: various bug fixes
 - v0.6.3: various bug fixes
 - v0.6.2: synchronized the -v9 `CameraFragment` with the main one
 - v0.6.1: fixed issue with Motorola device support

@@ -38,10 +38,12 @@ public interface CameraHost extends Camera.AutoFocusCallback {
    * towards. If your use of the camera is single-purpose,
    * return STILL_ONLY (for photos) or VIDEO_ONLY (for
    * videos). If you support both (all the time or via some
-   * sort of user-selectable mode), use ANY.
+   * sort of user-selectable mode), use ANY. NONE indicates
+   * that something else should be making this decision
+   * (for internal use only).
    */
   public enum RecordingHint {
-    STILL_ONLY, VIDEO_ONLY, ANY
+    STILL_ONLY, VIDEO_ONLY, ANY, NONE
   }
 
   /**
