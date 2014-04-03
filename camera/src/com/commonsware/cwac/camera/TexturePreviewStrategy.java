@@ -32,7 +32,7 @@ class TexturePreviewStrategy implements PreviewStrategy,
 
   TexturePreviewStrategy(CameraView cameraView) {
     this.cameraView=cameraView;
-    widget=new CustomTextureView(cameraView.getContext());
+    widget=new TextureView(cameraView.getContext());
     widget.setSurfaceTextureListener(this);
   }
 
