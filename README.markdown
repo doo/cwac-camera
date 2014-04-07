@@ -874,6 +874,7 @@ and `Build.PRODUCT` values for the device.
 | Google Nexus S                      |`samsung`/`soju`                 | 4.1.2 | 4.1.2 ||
 | HTC Droid Incredible 2              | ???                             | 2.3.4 | 2.3.4 ||
 | HTC One S                           |`HTC`/`ville`                    | 4.1.1 | 4.1.1 | [76](https://github.com/commonsguy/cwac-camera/issues/76)    |
+| HTC Thunderbolt                     |`HTC`/`htc_mecha`                |       | 4.0.4 ||
 | Lenovo ThinkPad Tablet              |`LENOVO`/`ThinkPadTablet`        | 4.0.3 | 4.0.3 | [38](https://github.com/commonsguy/cwac-camera/issues/38) [111](https://github.com/commonsguy/cwac-camera/issues/111) |
 | LG G2 (LG-D802)                     |`LGE`/`g2_open_com`              |       | 4.2.2 ||
 | LG G Pad 8.3 (LG-V510)              | ???                             |       | 4.4.2 ||
@@ -887,6 +888,7 @@ and `Build.PRODUCT` values for the device.
 | Samsung Galaxy S3 (GT-I9300)        |`samsung`/`m0xx`                 | 4.1.2 | 4.3   | [77](https://github.com/commonsguy/cwac-camera/issues/77)     |
 | Samsung Galaxy S4 (GT-I9500)        |`samsung`/`ja3gxx`               | 4.3   | 4.3   ||
 | Samsung Galaxy S4 (SGH-I337)        |`samsung`/`jflteuc`              | 4.2.2 | 4.2.2 ||
+| Samsung Galaxy S4 Zoom (SM-C105A)   |`samsung`/`mprojectlteuc`        |       | 4.2.2 ||
 | Samsung Galaxy Tab 2 7.0 (GT-P3113) |`samsung`/`espressowifiue`       | 4.2.2 | 4.2.2 | [107](https://github.com/commonsguy/cwac-camera/issues/107)|
 | SONY Ericsson Xperia Play           | ???                             | 2.3.6 | 2.3.6 | [113](https://github.com/commonsguy/cwac-camera/issues/113) |
 | SONY Xperia E                       |`Sony`/`C1505_1270-4354`         | 4.1.1 | 4.1.1 | [45](https://github.com/commonsguy/cwac-camera/issues/45)     |
@@ -904,7 +906,7 @@ if you are using the `.acl` flavor of `CameraFragment`.
 
 Version
 -------
-This is version v0.6.4 of this module, meaning it is coming along nicely.
+This is version v0.6.5 of this module, meaning it is coming along nicely.
 
 Demo
 ----
@@ -942,6 +944,7 @@ the fence may work, but it may not.
 
 Release Notes
 -------------
+- v0.6.5: yet more various bug fixes
 - v0.6.4: various bug fixes
 - v0.6.3: various bug fixes
 - v0.6.2: synchronized the -v9 `CameraFragment` with the main one

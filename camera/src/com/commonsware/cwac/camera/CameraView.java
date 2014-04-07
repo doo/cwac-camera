@@ -337,8 +337,15 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
                 postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        camera.takePicture(xact, null,
-                                new PictureTransactionCallback(xact));
+                        try {
+                            camera.takePicture(xact, null,
+                                    new PictureTransactionCallback(xact));
+                        }
+                        catch (Exception e) {
+                            android.util.Log.e(getClass().getSimpleName(),
+                                    "Exception taking a picture", e);
+                            // TODO get this out to library clients
+                        }
                     }
                 }, xact.host.getDeviceProfile().getPictureDelay());
 
@@ -359,6 +366,11 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
             throw new UnsupportedOperationException(
                     "Video recording supported only on API Level 11+");
+        }
+
+        if (displayOrientation != 0 && displayOrientation != 180) {
+            throw new UnsupportedOperationException(
+                    "Video recording supported only in landscape");
         }
 
         Camera.Parameters pictureParams=camera.getParameters();

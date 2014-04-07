@@ -93,44 +93,4 @@ abstract public class DeviceProfile {
   private boolean isCyanogenMod() {
     return(System.getProperty("os.version").contains("cyanogenmod") || Build.HOST.contains("cyanogenmod"));
   }
-
-  /*
-   * private static class NexusSeven2012Profile extends
-   * DeviceProfile { public int getDefaultOrientation() {
-   * return(270); } }
-   */
-  /*
-   * private static class HtcOneDeviceProfile extends
-   * DeviceProfile { public int getMaxPictureHeight() {
-   * return(1400); } }
-   * 
-   * private static class Nexus4DeviceProfile extends
-   * DeviceProfile { public int getMaxPictureHeight() {
-   * return(720); } }
-   * 
-   * private static class SamsungGalaxyTab2Profile extends
-   * DeviceProfile { public int getMaxPictureHeight() {
-   * return(1104); } }
-   * 
-   * private static class SamsungGalaxyAce3Profile extends
-   * DeviceProfile { }
-   * 
-   * private static class SamsungGalaxySGHI337DeviceProfile
-   * extends DeviceProfile { public int
-   * getMaxPictureHeight() { return(2448); } }
-   * 
-   * private static class SamsungGalaxyS3DeviceProfile
-   * extends DeviceProfile { public int
-   * getMinPictureHeight() { return(1836); } }
-   * 
-   * private static class SamsungGalaxyCameraDeviceProfile
-   * extends DeviceProfile { public int
-   * getMaxPictureHeight() { return(3072); } }
-   * 
-   * private static class DroidIncredible2Profile extends
-   * DeviceProfile { public boolean portraitFFCFlipped() {
-   * return(true); }
-   * 
-   * public int getMaxPictureHeight() { return(1952); } }
-   */
 }

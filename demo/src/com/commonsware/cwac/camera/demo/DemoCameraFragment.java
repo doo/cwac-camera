@@ -86,14 +86,16 @@ public class DemoCameraFragment extends CameraFragment implements
     ((ViewGroup)results.findViewById(R.id.camera)).addView(cameraView);
     zoom=(SeekBar)results.findViewById(R.id.zoom);
     zoom.setKeepScreenOn(true);
+    
+    setRecordingItemVisibility();
 
     return(results);
   }
-  
+
   @Override
   public void onPause() {
     super.onPause();
-    
+
     getActivity().invalidateOptionsMenu();
   }
 
@@ -115,9 +117,7 @@ public class DemoCameraFragment extends CameraFragment implements
       takePictureItem.setVisible(false);
     }
 
-    if (getDisplayOrientation() != 0 && getDisplayOrientation() != 180) {
-      recordItem.setVisible(false);
-    }
+    setRecordingItemVisibility();
   }
 
   @Override
@@ -220,6 +220,15 @@ public class DemoCameraFragment extends CameraFragment implements
   @Override
   public void onStopTrackingTouch(SeekBar seekBar) {
     // ignore
+  }
+
+  void setRecordingItemVisibility() {
+    if (zoom != null && recordItem != null) {
+      if (getDisplayOrientation() != 0
+          && getDisplayOrientation() != 180) {
+        recordItem.setVisible(false);
+      }
+    }
   }
 
   Contract getContract() {

@@ -1,9 +1,5 @@
-<!-- Galaxy S4 (SGH-I337) -->
+<!-- Samsung Galaxy S4 (GT-I9500) -->
 <deviceProfile>
-
-	<maxPictureHeight>
-2448
-	</maxPictureHeight>
 
 	<recordingHint>
 STILL_ONLY
