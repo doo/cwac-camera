@@ -55,6 +55,7 @@ public class ImageCleanupTask extends Thread {
     Bitmap cleaned=null;
     ExifInterface exif=null;
 
+    int imageOrientation=0;
     if (applyMatrix) {
       if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
         if (xact.host.getDeviceProfile().portraitFFCFlipped()
@@ -67,8 +68,6 @@ public class ImageCleanupTask extends Thread {
       }
 
       try {
-        int imageOrientation=0;
-
         if (xact.host.getDeviceProfile().useDeviceOrientation()) {
           imageOrientation=xact.displayOrientation;
         }
@@ -114,7 +113,7 @@ public class ImageCleanupTask extends Thread {
         // TODO: ripple to client
       }
 
-      if (matrix != null) {
+      if (matrix != null && xact.needBitmap) {
         Bitmap original=
             BitmapFactory.decodeByteArray(data, 0, data.length);
 
@@ -134,7 +133,7 @@ public class ImageCleanupTask extends Thread {
     }
 
     if (xact.needByteArray) {
-      if (matrix != null) {
+      if (cleaned != null) {
         ByteArrayOutputStream out=new ByteArrayOutputStream();
 
         // if (exif == null) {
@@ -163,7 +162,7 @@ public class ImageCleanupTask extends Thread {
         }
       }
 
-      xact.host.saveImage(xact, data);
+      xact.host.saveImage(xact, data, imageOrientation);
     }
 
     System.gc();

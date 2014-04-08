@@ -240,13 +240,15 @@ public interface CameraHost extends Camera.AutoFocusCallback {
   /**
    * Called when a picture has been taken. This will be
    * called on a background thread.
-   * 
+   *
+   * passes image orientation
+   *
    * @param image
    *          byte array of the picture data (e.g., JPEG)
    */
-  void saveImage(PictureTransaction xact, byte[] image);
+  void saveImage(PictureTransaction xact, byte[] image, int imageOrientation);
 
-  /**
+    /**
    * @return true if you want the camera to keep the preview
    *         disabled after taking a picture (e.g., you want
    *         to present the picture to the user for editing

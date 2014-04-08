@@ -685,16 +685,12 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
         @Override
         public void onOrientationChanged(int orientation) {
             if (camera != null && orientation != ORIENTATION_UNKNOWN) {
-                int newOutputOrientation=getCameraPictureRotation(orientation);
+                outputOrientation=getCameraPictureRotation(orientation);
 
-                if (newOutputOrientation != outputOrientation) {
-                    outputOrientation=newOutputOrientation;
+                Camera.Parameters params=camera.getParameters();
 
-                    Camera.Parameters params=camera.getParameters();
-
-                    params.setRotation(outputOrientation);
-                    camera.setParameters(params);
-                }
+                params.setRotation(outputOrientation);
+                camera.setParameters(params);
             }
         }
 

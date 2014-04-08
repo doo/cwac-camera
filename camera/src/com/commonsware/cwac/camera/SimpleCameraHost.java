@@ -200,7 +200,7 @@ public class SimpleCameraHost implements CameraHost {
   }
 
   @Override
-  public void saveImage(PictureTransaction xact, byte[] image) {
+  public void saveImage(PictureTransaction xact, byte[] image, int imageOrientation) {
     File photo=getPhotoPath();
 
     if (photo.exists()) {
