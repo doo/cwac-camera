@@ -14,5 +14,6 @@
 	<string name="no_image">There was no image to show!</string>
 	<string name="show_zoom">Show Zoom</string>
 	<string name="flash">Flash</string>
+	<string name="launch_full_screen">Launch Full-Screen</string>
 
 </resources>

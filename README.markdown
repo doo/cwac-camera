@@ -879,6 +879,7 @@ and `Build.PRODUCT` values for the device.
 | LG G2 (LG-D802)                     |`LGE`/`g2_open_com`              |       | 4.2.2 ||
 | LG G Pad 8.3 (LG-V510)              | ???                             |       | 4.4.2 ||
 | Motorola RAZR i                     |`motorola`/`XT890_rtgb`          | 4.1.2 | 4.1.2 ||
+| Nokia X                             |`Nokia`/`RM-980`                 |       | 4.1.2 ||
 | Samsung Galaxy Ace (GT-S5830M)      | ???                             | 2.3.6 | 2.3.6 ||
 | Samsung Galaxy Ace 3 (GT-S7270L)    |`samsung`/`loganub`              |       | 4.2.2 | [92](https://github.com/commonsguy/cwac-camera/issues/92) |
 | Samsung Galaxy Camera (EK-GC110)    |`samsung`/`gd1wifiue`            |       | 4.1.2 | [105](https://github.com/commonsguy/cwac-camera/issues/105) |
@@ -886,6 +887,7 @@ and `Build.PRODUCT` values for the device.
 | Samsung Galaxy Note 2 (GT-N7100)    |`samsung`/`t03gxx`               | 4.1.2 | 4.1.2 | [19](https://github.com/commonsguy/cwac-camera/issues/19)     |
 | Samsung Galaxy Pocket Neo (GT-S5312)|`samsung`/`corsicadd`            |       | 4.1.2 ||
 | Samsung Galaxy S3 (GT-I9300)        |`samsung`/`m0xx`                 | 4.1.2 | 4.3   | [77](https://github.com/commonsguy/cwac-camera/issues/77)     |
+| Samsung Galaxy S3 (SGH-T999)        |`samsung`/`d2tmo`                |       | 4.3   ||
 | Samsung Galaxy S4 (GT-I9500)        |`samsung`/`ja3gxx`               | 4.3   | 4.3   ||
 | Samsung Galaxy S4 (SGH-I337)        |`samsung`/`jflteuc`              | 4.2.2 | 4.2.2 ||
 | Samsung Galaxy S4 Zoom (SM-C105A)   |`samsung`/`mprojectlteuc`        |       | 4.2.2 ||
@@ -906,7 +908,7 @@ if you are using the `.acl` flavor of `CameraFragment`.
 
 Version
 -------
-This is version v0.6.5 of this module, meaning it is coming along nicely.
+This is version v0.6.6 of this module, meaning it is coming along nicely.
 
 Demo
 ----
@@ -944,6 +946,7 @@ the fence may work, but it may not.
 
 Release Notes
 -------------
+- v0.6.6: fixed S3 bug, added sample full-screen activity
 - v0.6.5: yet more various bug fixes
 - v0.6.4: various bug fixes
 - v0.6.3: various bug fixes

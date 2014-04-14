@@ -14,5 +14,10 @@
 		android:showAsAction="never"
 		android:title="@string/launch_camera_app">
 	</item>
-
+  <item
+    android:id="@+id/fullscreen"
+    android:showAsAction="never"
+    android:title="@string/launch_full_screen">
+  </item>
+	
 </menu>

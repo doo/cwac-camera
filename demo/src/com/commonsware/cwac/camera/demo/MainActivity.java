@@ -155,6 +155,9 @@ public class MainActivity extends Activity implements
       current.lockToLandscape(item.isChecked());
       isLockedToLandscape=item.isChecked();
     }
+    else if (item.getItemId() == R.id.fullscreen) {
+      startActivity(new Intent(this, FullScreenActivity.class));
+    }
 
     return(super.onOptionsItemSelected(item));
   }

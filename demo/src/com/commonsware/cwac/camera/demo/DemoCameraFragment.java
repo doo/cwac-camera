@@ -86,7 +86,7 @@ public class DemoCameraFragment extends CameraFragment implements
     ((ViewGroup)results.findViewById(R.id.camera)).addView(cameraView);
     zoom=(SeekBar)results.findViewById(R.id.zoom);
     zoom.setKeepScreenOn(true);
-    
+
     setRecordingItemVisibility();
 
     return(results);
@@ -124,18 +124,7 @@ public class DemoCameraFragment extends CameraFragment implements
   public boolean onOptionsItemSelected(MenuItem item) {
     switch (item.getItemId()) {
       case R.id.camera:
-        if (singleShotItem.isChecked()) {
-          singleShotProcessing=true;
-          takePictureItem.setEnabled(false);
-        }
-
-        PictureTransaction xact=new PictureTransaction(getHost());
-
-        if (flashItem.isChecked()) {
-          xact.flashMode(flashMode);
-        }
-
-        takePicture(xact);
+        takeSimplePicture();
 
         return(true);
 
@@ -235,6 +224,21 @@ public class DemoCameraFragment extends CameraFragment implements
     return((Contract)getActivity());
   }
 
+  void takeSimplePicture() {
+    if (singleShotItem!=null && singleShotItem.isChecked()) {
+      singleShotProcessing=true;
+      takePictureItem.setEnabled(false);
+    }
+
+    PictureTransaction xact=new PictureTransaction(getHost());
+
+    if (flashItem!=null && flashItem.isChecked()) {
+      xact.flashMode(flashMode);
+    }
+
+    takePicture(xact);
+  }
+
   interface Contract {
     boolean isSingleShotMode();
 
@@ -251,11 +255,19 @@ public class DemoCameraFragment extends CameraFragment implements
 
     @Override
     public boolean useFrontFacingCamera() {
+      if (getArguments() == null) {
+        return(false);
+      }
+
       return(getArguments().getBoolean(KEY_USE_FFC));
     }
 
     @Override
     public boolean useSingleShotMode() {
+      if (singleShotItem == null) {
+        return(false);
+      }
+
       return(singleShotItem.isChecked());
     }
 
@@ -281,16 +293,22 @@ public class DemoCameraFragment extends CameraFragment implements
 
     @Override
     public void autoFocusAvailable() {
-      autoFocusItem.setEnabled(true);
-      if (supportsFaces)
-        startFaceDetection();
+      if (autoFocusItem != null) {
+        autoFocusItem.setEnabled(true);
+        
+        if (supportsFaces)
+          startFaceDetection();
+      }
     }
 
     @Override
     public void autoFocusUnavailable() {
-      stopFaceDetection();
-      if (supportsFaces)
-        autoFocusItem.setEnabled(false);
+      if (autoFocusItem != null) {
+        stopFaceDetection();
+        
+        if (supportsFaces)
+          autoFocusItem.setEnabled(false);
+      }
     }
 
     @Override
