@@ -144,9 +144,8 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
     }
 
     public void onPause() {
-        if (camera != null) {
-            camera.setPreviewCallback(null);
-            previewDestroyed();
+        previewDestroyed();
+        if (previewStrategy.getWidget() != null) {
             removeView(previewStrategy.getWidget());
         }
     }
@@ -527,6 +526,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
 
     void previewDestroyed() {
         if (camera != null) {
+            camera.setPreviewCallback(null);
             previewStopped();
             camera.release();
             camera=null;
@@ -690,7 +690,11 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
                 Camera.Parameters params=camera.getParameters();
 
                 params.setRotation(outputOrientation);
-                camera.setParameters(params);
+                try {
+                    camera.setParameters(params);
+                } catch (RuntimeException e) {
+                    e.printStackTrace();
+                }
             }
         }
 
