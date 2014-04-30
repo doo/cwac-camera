@@ -74,7 +74,7 @@ there are two JARs in
 - `camera-X.Y.Z.jar` represents the core classes, used in all environments
 - `camera-v9-X.Y.Z.jar` adds support for ActionBarSherlock
 
-(where `X.Y.Z` is the version number of the project, such as `0.6.2`)
+(where `X.Y.Z` is the version number of the project, such as `0.6.7`)
 
 Users of the JARs will also want to copy the contents of
 the `camera/res/xml/` directory into their project, as that directory
@@ -874,6 +874,7 @@ and `Build.PRODUCT` values for the device.
 | Google Nexus S                      |`samsung`/`soju`                 | 4.1.2 | 4.1.2 ||
 | HTC Droid Incredible 2              | ???                             | 2.3.4 | 2.3.4 ||
 | HTC One S                           |`HTC`/`ville`                    | 4.1.1 | 4.1.1 | [76](https://github.com/commonsguy/cwac-camera/issues/76)    |
+| HTC One M7 Google Play Edition      |`HTC`/`m7_google`                |       | 4.4.2 ||
 | HTC Thunderbolt                     |`HTC`/`htc_mecha`                |       | 4.0.4 ||
 | Lenovo ThinkPad Tablet              |`LENOVO`/`ThinkPadTablet`        | 4.0.3 | 4.0.3 | [38](https://github.com/commonsguy/cwac-camera/issues/38) [111](https://github.com/commonsguy/cwac-camera/issues/111) |
 | LG G2 (LG-D802)                     |`LGE`/`g2_open_com`              |       | 4.2.2 ||
@@ -897,6 +898,7 @@ and `Build.PRODUCT` values for the device.
 | SONY Xperia S LT26i                 |`Sony Ericsson`/`LT26i_1257-4921`| 4.1.2 |       |
 | SONY Xperia Z                       |`Sony`/`C6603_1270-7689`         | 4.2.2 | 4.3   ||
 | SONY Xperia Z Ultra                 |`Sony`/`C6802`                   | 4.2.2 | 4.3   ||
+| SONY Xperia Z2 Tablet               |`Sony`/`SGP521`                  |       | 4.4.2 ||
 
 Dependencies
 ------------
@@ -908,7 +910,7 @@ if you are using the `.acl` flavor of `CameraFragment`.
 
 Version
 -------
-This is version v0.6.6 of this module, meaning it is coming along nicely.
+This is version v0.6.7 of this module, meaning it is coming along nicely.
 
 Demo
 ----
@@ -946,6 +948,7 @@ the fence may work, but it may not.
 
 Release Notes
 -------------
+- v0.6.7: extended S3 bug fix to AT&T model
 - v0.6.6: fixed S3 bug, added sample full-screen activity
 - v0.6.5: yet more various bug fixes
 - v0.6.4: various bug fixes
