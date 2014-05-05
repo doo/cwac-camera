@@ -109,6 +109,25 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
         previewParams = parameters;
     }
 
+    /**
+     * You must call {@code super.onCameraOpen} first
+     * @param camera
+     */
+    public void onCameraOpen(Camera camera) throws RuntimeException{
+        if (getActivity().getRequestedOrientation() != ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED) {
+            onOrientationChange.enable();
+        }
+
+        setCameraDisplayOrientation();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH
+                && getHost() instanceof Camera.FaceDetectionListener) {
+            camera.setFaceDetectionListener((Camera.FaceDetectionListener)getHost());
+        }
+
+        setPreviewCallback(previewCallback);
+    }
+
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     public void onResume() {
         addView(previewStrategy.getWidget());
@@ -119,19 +138,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
             if (cameraId >= 0) {
                 try {
                     camera=Camera.open(cameraId);
-
-                    if (getActivity().getRequestedOrientation() != ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED) {
-                        onOrientationChange.enable();
-                    }
-
-                    setCameraDisplayOrientation();
-
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH
-                            && getHost() instanceof Camera.FaceDetectionListener) {
-                        camera.setFaceDetectionListener((Camera.FaceDetectionListener)getHost());
-                    }
-
-                    camera.setPreviewCallbackWithBuffer(previewCallback);
+                    onCameraOpen(camera);
                 }
                 catch (Exception e) {
                     getHost().onCameraFail(FailureReason.UNKNOWN);
@@ -493,7 +500,11 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
         previewCallback = callback;
         if (camera != null) {
             try {
-                camera.setPreviewCallbackWithBuffer(callback);
+                if (getHost().getDeviceProfile().isCyanogenMod()) {
+                    camera.setPreviewCallback(previewCallback);
+                } else {
+                    camera.setPreviewCallbackWithBuffer(previewCallback);
+                }
             } catch (RuntimeException e) {
                 e.printStackTrace();
             }
@@ -526,7 +537,6 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
 
     void previewDestroyed() {
         if (camera != null) {
-            camera.setPreviewCallback(null);
             previewStopped();
             camera.release();
             camera=null;
@@ -575,6 +585,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
     public void stopPreview() {
         inPreview=false;
         getHost().autoFocusUnavailable();
+        camera.setPreviewCallback(null);
         camera.stopPreview();
     }
 

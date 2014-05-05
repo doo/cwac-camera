@@ -164,14 +164,6 @@ public class SimpleDeviceProfile extends DeviceProfile {
     return(recordingHint);
   }
 
-  // based on http://stackoverflow.com/a/9801191/115145
-  // and
-  // https://github.com/commonsguy/cwac-camera/issues/43#issuecomment-23791446
-
-  private boolean isCyanogenMod() {
-    return(System.getProperty("os.version").contains("cyanogenmod") || Build.HOST.contains("cyanogenmod"));
-  }
-
   static class MotorolaRazrI extends SimpleDeviceProfile {
     public boolean doesZoomActuallyWork(boolean isFFC) {
       return(!isFFC);

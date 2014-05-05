@@ -90,7 +90,7 @@ abstract public class DeviceProfile {
     return(input.replaceAll("[\\W]", "_").toLowerCase(Locale.US));
   }
 
-  private boolean isCyanogenMod() {
+  public boolean isCyanogenMod() {
     return(System.getProperty("os.version").contains("cyanogenmod") || Build.HOST.contains("cyanogenmod"));
   }
 }
