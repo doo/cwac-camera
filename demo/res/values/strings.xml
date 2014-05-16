@@ -15,5 +15,6 @@
 	<string name="show_zoom">Show Zoom</string>
 	<string name="flash">Flash</string>
 	<string name="launch_full_screen">Launch Full-Screen</string>
+	<string name="mirror_ffc">Mirror FFC</string>
 
 </resources>

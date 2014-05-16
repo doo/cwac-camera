@@ -48,6 +48,7 @@ public class DemoCameraFragment extends CameraFragment implements
   private MenuItem flashItem=null;
   private MenuItem recordItem=null;
   private MenuItem stopRecordItem=null;
+  private MenuItem mirrorFFC=null;
   private boolean singleShotProcessing=false;
   private SeekBar zoom=null;
   private long lastFaceToast=0L;
@@ -110,6 +111,7 @@ public class DemoCameraFragment extends CameraFragment implements
     flashItem=menu.findItem(R.id.flash);
     recordItem=menu.findItem(R.id.record);
     stopRecordItem=menu.findItem(R.id.stop);
+    mirrorFFC=menu.findItem(R.id.mirror_ffc);
 
     if (isRecording()) {
       recordItem.setVisible(false);
@@ -175,6 +177,7 @@ public class DemoCameraFragment extends CameraFragment implements
         return(true);
 
       case R.id.flash:
+      case R.id.mirror_ffc:
         item.setChecked(!item.isChecked());
 
         return(true);
@@ -367,6 +370,11 @@ public class DemoCameraFragment extends CameraFragment implements
       super.onAutoFocus(success, camera);
 
       takePictureItem.setEnabled(true);
+    }
+    
+    @Override
+    public boolean mirrorFFC() {
+      return(mirrorFFC.isChecked());
     }
   }
 }

@@ -71,10 +71,13 @@ If you are using Eclipse, Ant, or otherwise need JAR files,
 there are two JARs in
 [the releases area of the repo](https://github.com/commonsguy/cwac-camera/releases):
 
-- `camera-X.Y.Z.jar` represents the core classes, used in all environments
-- `camera-v9-X.Y.Z.jar` adds support for ActionBarSherlock
+- `cwac-camera-X.Y.Z.jar` represents the core classes, used in all environments
+- `cwac-camera-v9-X.Y.Z.jar` adds support for ActionBarSherlock
 
-(where `X.Y.Z` is the version number of the project, such as `0.6.7`)
+(where `X.Y.Z` is the version number of the project, such as `0.6.8`)
+
+**NOTE**: The JAR name, as of v0.6.8, has a `cwac-` prefix, to help distinguish
+it from other JARs.
 
 Users of the JARs will also want to copy the contents of
 the `camera/res/xml/` directory into their project, as that directory
@@ -892,6 +895,7 @@ and `Build.PRODUCT` values for the device.
 | Samsung Galaxy S4 (GT-I9500)        |`samsung`/`ja3gxx`               | 4.3   | 4.3   ||
 | Samsung Galaxy S4 (SGH-I337)        |`samsung`/`jflteuc`              | 4.2.2 | 4.2.2 ||
 | Samsung Galaxy S4 Zoom (SM-C105A)   |`samsung`/`mprojectlteuc`        |       | 4.2.2 ||
+| Samsung Galaxy S5 (SM-G900H)				| ???															|       | 4.4 ||
 | Samsung Galaxy Tab 2 7.0 (GT-P3113) |`samsung`/`espressowifiue`       | 4.2.2 | 4.2.2 | [107](https://github.com/commonsguy/cwac-camera/issues/107)|
 | SONY Ericsson Xperia Play           | ???                             | 2.3.6 | 2.3.6 | [113](https://github.com/commonsguy/cwac-camera/issues/113) |
 | SONY Xperia E                       |`Sony`/`C1505_1270-4354`         | 4.1.1 | 4.1.1 | [45](https://github.com/commonsguy/cwac-camera/issues/45)     |
@@ -910,7 +914,7 @@ if you are using the `.acl` flavor of `CameraFragment`.
 
 Version
 -------
-This is version v0.6.7 of this module, meaning it is coming along nicely.
+This is version v0.6.8 of this module, meaning it is coming along nicely.
 
 Demo
 ----
@@ -930,13 +934,13 @@ file.
 Questions
 ---------
 If you have questions regarding the use of this code, please post a question
-on [StackOverflow](http://stackoverflow.com/questions/ask) tagged with `commonsware` and `android`. Be sure to indicate
+on [StackOverflow](http://stackoverflow.com/questions/ask) tagged with `commonsware-cwac` and `android`. Be sure to indicate
 what CWAC module you are having issues with, and be sure to include source code 
 and stack traces if you are encountering crashes.
 
 If you have encountered what is clearly a bug, or if you have a feature request,
 please post an [issue](https://github.com/commonsguy/cwac-camera/issues).
-Be certain to include complete steps for reproducing the issue.
+**Be certain to include complete steps for reproducing the issue.**
 
 Do not ask for help via Twitter.
 
@@ -948,6 +952,7 @@ the fence may work, but it may not.
 
 Release Notes
 -------------
+- v0.6.8: yet more bug fixes, added `cwac-` prefix to JAR
 - v0.6.7: extended S3 bug fix to AT&T model
 - v0.6.6: fixed S3 bug, added sample full-screen activity
 - v0.6.5: yet more various bug fixes

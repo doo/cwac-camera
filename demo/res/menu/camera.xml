@@ -38,11 +38,17 @@
 		android:checked="true"
 		android:title="@string/show_zoom">
 	</item>
-  <item
-    android:id="@+id/flash"
-    android:checkable="true"
-    android:checked="true"
-    android:title="@string/flash">
-  </item>
-	
+	<item
+		android:id="@+id/flash"
+		android:checkable="true"
+		android:checked="true"
+		android:title="@string/flash">
+	</item>
+	<item
+		android:id="@+id/mirror_ffc"
+		android:checkable="true"
+		android:checked="false"
+		android:title="@string/mirror_ffc">
+	</item>
+
 </menu>
