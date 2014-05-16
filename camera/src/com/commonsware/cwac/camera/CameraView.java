@@ -235,7 +235,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        if (changed && getChildCount() > 0) {
+        if (getChildCount() > 0) {
             final View child=getChildAt(0);
             final int width=r - l;
             final int height=b - t;
