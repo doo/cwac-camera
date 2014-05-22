@@ -35,6 +35,10 @@ import java.io.IOException;
 import com.commonsware.cwac.camera.CameraHost.FailureReason;
 
 public class CameraView extends ViewGroup implements AutoFocusCallback {
+
+    private static final int[] ROTATION_DEGREES = {0, 90, 180, 270};
+    private static final int UPDATE_RATE_US = 200 * 1000;
+
     static final String TAG="CWAC-Camera";
     private PreviewStrategy previewStrategy;
     private Camera.Size previewSize;
@@ -686,43 +690,64 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
     }
 
     private class OnOrientationChange extends OrientationEventListener {
-        private boolean isEnabled=false;
+
+        private int currentOrientation = ORIENTATION_UNKNOWN;
+        private boolean isEnabled = false;
 
         public OnOrientationChange(Context context) {
-            super(context);
+            super(context, UPDATE_RATE_US);
             disable();
         }
 
         @Override
         public void onOrientationChanged(int orientation) {
-            if (camera != null && orientation != ORIENTATION_UNKNOWN) {
-                outputOrientation=getCameraPictureRotation(orientation);
+            if (camera == null || !canDetectOrientation() || orientation == ORIENTATION_UNKNOWN) {
+                return;
+            }
 
-                Camera.Parameters params=camera.getParameters();
+            orientation = getClosestRotationDegree(orientation);
+
+            if (orientation != currentOrientation) {
+                outputOrientation = getCameraPictureRotation(orientation);
+
+                Camera.Parameters params = camera.getParameters();
 
                 params.setRotation(outputOrientation);
                 try {
                     camera.setParameters(params);
+                    currentOrientation = orientation;
                 } catch (RuntimeException e) {
                     e.printStackTrace();
                 }
             }
         }
 
+        private int getClosestRotationDegree(int rotation) {
+            for (int value : ROTATION_DEGREES) {
+                final int diff = Math.abs(rotation - value);
+
+                if (diff < 45) {
+                    return value;
+                }
+            }
+
+            return 0;
+        }
+
         @Override
         public void enable() {
-            isEnabled=true;
+            isEnabled = true;
             super.enable();
         }
 
         @Override
         public void disable() {
-            isEnabled=false;
+            isEnabled = false;
             super.disable();
         }
 
         boolean isEnabled() {
-            return(isEnabled);
+            return (isEnabled);
         }
     }
 
