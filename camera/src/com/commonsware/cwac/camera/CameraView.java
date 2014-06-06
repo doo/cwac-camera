@@ -504,7 +504,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
         previewCallback = callback;
         if (camera != null) {
             try {
-                if (getHost().getDeviceProfile().isCyanogenMod()) {
+                if (getHost().getDeviceProfile().isCustomRom()) {
                     camera.setPreviewCallback(previewCallback);
                 } else {
                     camera.setPreviewCallbackWithBuffer(previewCallback);
