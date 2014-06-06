@@ -516,7 +516,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
     }
 
     public void addPreviewCallbackBuffer(byte[] buffer) {
-        if (camera != null) {
+        if (camera != null && buffer != null) {
             camera.addCallbackBuffer(buffer);
         }
     }
