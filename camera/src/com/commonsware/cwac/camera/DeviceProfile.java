@@ -95,7 +95,8 @@ abstract public class DeviceProfile {
             || isCyanogenMod()
             || isOmni()
             || isAchiDroid()
-            || isMIUI();
+            || isMIUI()
+            || isSlimKat();
   }
 
     private boolean isCyanogenMod() {
@@ -112,6 +113,10 @@ abstract public class DeviceProfile {
 
     private boolean isMIUI() {
         return Build.ID.contains("MIUI");
+    }
+
+    private boolean isSlimKat() {
+        return System.getProperty("os.version").contains("Slim_Kat") || Build.HOST.contains("slimautobuild");
     }
 
     private boolean usesTestKeys() {
