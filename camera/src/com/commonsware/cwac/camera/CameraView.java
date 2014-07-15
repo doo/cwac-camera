@@ -134,6 +134,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
 
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     public void onResume() {
+        onOrientationChange.resetOrientation();
         addView(previewStrategy.getWidget());
 
         if (camera == null) {
@@ -697,6 +698,10 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
         public OnOrientationChange(Context context) {
             super(context, UPDATE_RATE_US);
             disable();
+        }
+
+        public void resetOrientation() {
+            currentOrientation = ORIENTATION_UNKNOWN;
         }
 
         @Override
