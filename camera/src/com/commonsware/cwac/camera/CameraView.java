@@ -27,6 +27,7 @@ import android.media.MediaRecorder;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.OrientationEventListener;
 import android.view.Surface;
 import android.view.View;
@@ -877,8 +878,12 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
 
         @Override
         public void onPictureTaken(byte[] data, Camera camera) {
-            if (previewParams != null) {
-                camera.setParameters(previewParams);
+            if (previewParams != null && camera != null) {
+                try {
+                    camera.setParameters(previewParams);
+                } catch (RuntimeException e) {
+                    Log.e(getClass().getSimpleName(), "Could not set camera parameters!", e);
+                }
             }
 
             if (data != null) {
