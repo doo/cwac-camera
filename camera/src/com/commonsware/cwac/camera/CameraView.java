@@ -215,7 +215,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
                                 getHost().getPreferredPreviewSizeForVideo(getDisplayOrientation(),
                                         width,
                                         height,
-                                        getCameraParametersSync(),
+                                        getCameraParameters(),
                                         null);
                     }
 
@@ -336,56 +336,62 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
     }
 
     public void takePicture(final PictureTransaction xact) {
+        if (inPreview) {
+            if (isAutoFocusing) {
+                throw new IllegalStateException(
+                        "Camera cannot take a picture while auto-focusing");
+            }
+            else {
+                getCameraParametersSync();
+
+                Camera.Parameters pictureParams=camera.getParameters();
+                Camera.Size pictureSize=
+                        xact.host.getPictureSize(xact, pictureParams);
+
+                pictureParams.setPictureSize(pictureSize.width, pictureSize.height);
+                pictureParams.setPictureFormat(ImageFormat.JPEG);
+
+                if (xact.flashMode != null) {
+                    pictureParams.setFlashMode(xact.flashMode);
+                }
+
+                if (!onOrientationChange.isEnabled()) {
+                    setCameraPictureOrientation(pictureParams);
+                }
+
+                camera.setParameters(xact.host.adjustPictureParameters(xact, pictureParams));
+                xact.cameraView=CameraView.this;
+
+                postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        takePictureAsync(xact);
+                    }
+                }, xact.host.getDeviceProfile().getPictureDelay());
+
+                inPreview=false;
+            }
+        }
+        else {
+            throw new IllegalStateException(
+                    "Preview mode must have started before you can take a picture");
+        }
+    }
+
+    private void takePictureAsync(final PictureTransaction xact) {
         cameraExecutor.execute(new Runnable() {
             @Override
             public void run() {
-                if (inPreview && camera != null) {
-                    if (isAutoFocusing) {
-                        throw new IllegalStateException(
-                                "Camera cannot take a picture while auto-focusing");
+                if (camera != null) {
+                    try {
+                        camera.takePicture(xact, null,
+                                new PictureTransactionCallback(xact));
                     }
-                    else {
-                        getCameraParametersSync();
-
-                        Camera.Parameters pictureParams=camera.getParameters();
-                        Camera.Size pictureSize=
-                                xact.host.getPictureSize(xact, pictureParams);
-
-                        pictureParams.setPictureSize(pictureSize.width, pictureSize.height);
-                        pictureParams.setPictureFormat(ImageFormat.JPEG);
-
-                        if (xact.flashMode != null) {
-                            pictureParams.setFlashMode(xact.flashMode);
-                        }
-
-                        if (!onOrientationChange.isEnabled()) {
-                            setCameraPictureOrientation(pictureParams);
-                        }
-
-                        camera.setParameters(xact.host.adjustPictureParameters(xact, pictureParams));
-                        xact.cameraView=CameraView.this;
-
-                        postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                try {
-                                    camera.takePicture(xact, null,
-                                            new PictureTransactionCallback(xact));
-                                }
-                                catch (Exception e) {
-                                    android.util.Log.e(getClass().getSimpleName(),
-                                            "Exception taking a picture", e);
-                                    // TODO get this out to library clients
-                                }
-                            }
-                        }, xact.host.getDeviceProfile().getPictureDelay());
-
-                        inPreview=false;
+                    catch (Exception e) {
+                        android.util.Log.e(getClass().getSimpleName(),
+                                "Exception taking a picture", e);
+                        // TODO get this out to library clients
                     }
-                }
-                else {
-                    throw new IllegalStateException(
-                            "Preview mode must have started before you can take a picture");
                 }
             }
         });
@@ -644,6 +650,8 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
                         parameters.setRecordingHint(getHost().getRecordingHint() != CameraHost.RecordingHint.STILL_ONLY);
                     }
 
+                    setCameraParametersSync(getHost().adjustPreviewParameters(parameters));
+
                     post(new Runnable() {
                         @Override
                         public void run() {
@@ -651,7 +659,6 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
                         }
                     });
 
-                    setCameraParametersSync(getHost().adjustPreviewParameters(parameters));
                     startPreview();
                 }
             }
