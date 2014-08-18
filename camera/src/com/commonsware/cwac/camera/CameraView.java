@@ -269,7 +269,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
 
             // handle orientation
 
-            if (previewSize != null) {
+            if (previewSize != null && previewSize.height > 0 && previewSize.width > 0 ) {
                 if (getDisplayOrientation() == 90
                         || getDisplayOrientation() == 270) {
                     previewWidth=previewSize.height;
@@ -279,6 +279,10 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
                     previewWidth=previewSize.width;
                     previewHeight=previewSize.height;
                 }
+            }
+
+            if (previewWidth == 0 || previewHeight == 0) {
+                return;
             }
 
             boolean useFirstStrategy=
