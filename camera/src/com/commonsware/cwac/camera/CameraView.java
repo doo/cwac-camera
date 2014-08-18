@@ -58,7 +58,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
     private boolean isAutoFocusing=false;
     private Camera.PreviewCallback previewCallback;
 
-    private final Executor cameraExecutor = Executors.newSingleThreadExecutor();
+    private static final Executor cameraExecutor = Executors.newSingleThreadExecutor();
 
     public CameraView(Context context) {
         super(context);
