@@ -132,7 +132,11 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
      */
     private Camera.Parameters getCameraParametersSync() {
         if (camera != null) {
-            previewParams = camera.getParameters();
+            try {
+                previewParams = camera.getParameters();
+            } catch (RuntimeException e) {
+                android.util.Log.e(getClass().getSimpleName(), "Could not work with camera parameters?", e);
+            }
         }
         return previewParams;
     }
@@ -202,7 +206,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
         setMeasuredDimension(width, height);
 
         if (width > 0 && height > 0) {
-            if (camera != null) {
+            if (camera != null && getCameraParameters() != null) {
                 Camera.Size newSize=null;
 
                 try {
@@ -219,7 +223,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
                         newSize=
                                 getHost().getPreviewSize(getDisplayOrientation(),
                                         width, height,
-                                        getCameraParametersSync());
+                                        getCameraParameters());
                     }
                 }
                 catch (Exception e) {
@@ -335,7 +339,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
         cameraExecutor.execute(new Runnable() {
             @Override
             public void run() {
-                if (inPreview) {
+                if (inPreview && camera != null) {
                     if (isAutoFocusing) {
                         throw new IllegalStateException(
                                 "Camera cannot take a picture while auto-focusing");
@@ -447,9 +451,14 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
         cameraExecutor.execute(new Runnable() {
             @Override
             public void run() {
-                if (inPreview) {
-                    camera.autoFocus(CameraView.this);
-                    isAutoFocusing = true;
+                if (inPreview && camera != null) {
+                    try {
+                        camera.autoFocus(CameraView.this);
+                        isAutoFocusing = true;
+                    } catch (RuntimeException e) {
+                        android.util.Log.e(getClass().getSimpleName(), "Could not auto focus?", e);
+                    }
+
                 }
             }
         });
@@ -593,12 +602,10 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
             @Override
             public void run() {
                 if (camera != null) {
-                    if (camera != null) {
-                        previewStopped();
-                        camera.setPreviewCallback(null);
-                        camera.release();
-                        camera = null;
-                    }
+                    previewStopped();
+                    camera.setPreviewCallback(null);
+                    camera.release();
+                    camera = null;
                 }
             }
         });
@@ -863,7 +870,9 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
 
         @Override
         public void onPictureTaken(byte[] data, Camera camera) {
-            camera.setParameters(previewParams);
+            if (previewParams != null) {
+                camera.setParameters(previewParams);
+            }
 
             if (data != null) {
                 new ImageCleanupTask(getContext(), data, cameraId, xact).start();
