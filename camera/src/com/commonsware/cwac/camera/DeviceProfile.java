@@ -1,6 +1,6 @@
 /***
   Copyright (c) 2013-2014 CommonsWare, LLC
-  
+
   Licensed under the Apache License, Version 2.0 (the "License"); you may
   not use this file except in compliance with the License. You may obtain
   a copy of the License at
@@ -36,7 +36,7 @@ abstract public class DeviceProfile {
   abstract public boolean useDeviceOrientation();
 
   abstract public int getPictureDelay();
-  
+
   abstract public RecordingHint getDefaultRecordingHint();
 
   private static volatile DeviceProfile SINGLETON=null;
@@ -90,7 +90,37 @@ abstract public class DeviceProfile {
     return(input.replaceAll("[\\W]", "_").toLowerCase(Locale.US));
   }
 
-  public boolean isCyanogenMod() {
-    return(System.getProperty("os.version").contains("cyanogenmod") || Build.HOST.contains("cyanogenmod"));
+  public boolean isCustomRom() {
+    return usesTestKeys()
+            || isCyanogenMod()
+            || isOmni()
+            || isAchiDroid()
+            || isMIUI()
+            || isSlimKat();
   }
+
+    private boolean isCyanogenMod() {
+        return(System.getProperty("os.version").contains("cyanogenmod") || Build.HOST.contains("cyanogenmod"));
+    }
+
+    private boolean isOmni() {
+        return System.getProperty("os.version").contains("OMNI") || Build.HOST.contains("omnirom");
+    }
+
+    private boolean isAchiDroid() {
+        return Build.HOST.contains("ArchiDroid");
+    }
+
+    private boolean isMIUI() {
+        return Build.ID.contains("MIUI");
+    }
+
+    private boolean isSlimKat() {
+        return System.getProperty("os.version").contains("Slim_Kat") || Build.HOST.contains("slimautobuild");
+    }
+
+    private boolean usesTestKeys() {
+        return Build.FINGERPRINT.contains("test-keys");
+    }
+
 }
