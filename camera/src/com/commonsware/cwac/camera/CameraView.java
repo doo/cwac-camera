@@ -122,10 +122,16 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
      * @param parameters
      */
     private void setCameraParametersSync(Camera.Parameters parameters) {
-        if (camera != null && parameters != null) {
-            camera.setParameters(parameters);
+        try {
+            if (camera != null && parameters != null) {
+
+                    camera.setParameters(parameters);
+
+            }
+            previewParams = parameters;
+        } catch (RuntimeException e) {  //FIXME
+            e.printStackTrace();
         }
-        previewParams = parameters;
     }
 
     /**
@@ -680,10 +686,14 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
     }
 
     private void startPreviewSync() {
-        if (camera != null) {
-            camera.startPreview();
-            inPreview = true;
-            getHost().autoFocusAvailable();
+        try {
+            if (camera != null) {
+                camera.startPreview();
+                inPreview = true;
+                getHost().autoFocusAvailable();
+            }
+        } catch (RuntimeException e) {  //FIXME
+            e.printStackTrace();
         }
     }
 
@@ -697,11 +707,15 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
     }
 
     private void stopPreviewSync() {
-        if (camera != null) {
-            inPreview = false;
-            getHost().autoFocusUnavailable();
-            camera.setPreviewCallback(null);
-            camera.stopPreview();
+        try {
+            if (camera != null) {
+                inPreview = false;
+                getHost().autoFocusUnavailable();
+                camera.setPreviewCallback(null);
+                camera.stopPreview();
+            }
+        } catch (RuntimeException e) {  //FIXME
+            e.printStackTrace();
         }
     }
 
