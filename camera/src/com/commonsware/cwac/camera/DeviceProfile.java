@@ -112,7 +112,7 @@ abstract public class DeviceProfile {
     }
 
     private boolean isMIUI() {
-        return Build.ID.contains("MIUI");
+        return Build.ID.contains("MIUI") || Build.HOST.contains("miui");
     }
 
     private boolean isSlimKat() {
