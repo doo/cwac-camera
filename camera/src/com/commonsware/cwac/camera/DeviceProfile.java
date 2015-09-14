@@ -100,7 +100,7 @@ abstract public class DeviceProfile {
   }
 
     private boolean isCyanogenMod() {
-        return(System.getProperty("os.version").contains("cyanogenmod") || Build.HOST.contains("cyanogenmod"));
+        return(System.getProperty("os.version").contains("cyanogenmod") || System.getProperty("os.version").contains("CM") || Build.HOST.contains("cyanogenmod") || Build.HOST.contains("CM"));
     }
 
     private boolean isOmni() {

@@ -77,7 +77,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
         onOrientationChange=new OnOrientationChange(context);
 
         if (context instanceof CameraHostProvider) {
-            setHost(((CameraHostProvider)context).getCameraHost());
+            setCameraHost(((CameraHostProvider) context).getCameraHost());
         }
         else {
             throw new IllegalArgumentException("To use the two- or "
@@ -87,13 +87,13 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
         }
     }
 
-    public CameraHost getHost() {
+    public CameraHost getCameraHost() {
         return(host);
     }
 
     // must call this after constructor, before onResume()
 
-    public void setHost(CameraHost host) {
+    public void setCameraHost(CameraHost host) {
         this.host=host;
 
         if (host.getDeviceProfile().useTextureView()) {
@@ -160,8 +160,8 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
         setCameraDisplayOrientation();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH
-                && getHost() instanceof Camera.FaceDetectionListener) {
-            camera.setFaceDetectionListener((Camera.FaceDetectionListener)getHost());
+                && getCameraHost() instanceof Camera.FaceDetectionListener) {
+            camera.setFaceDetectionListener((Camera.FaceDetectionListener) getCameraHost());
         }
 
         setPreviewCallback(previewCallback);
@@ -177,7 +177,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
             @Override
             public void run() {
                 if (camera == null) {
-                    cameraId = getHost().getCameraId();
+                    cameraId = getCameraHost().getCameraId();
 
                     if (cameraId >= 0) {
                         try {
@@ -185,10 +185,10 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
                             getCameraParametersSync(); //sets previewParams
                             onCameraOpen(camera);
                         } catch (Exception e) {
-                            getHost().onCameraFail(FailureReason.UNKNOWN);
+                            getCameraHost().onCameraFail(FailureReason.UNKNOWN);
                         }
                     } else {
-                        getHost().onCameraFail(FailureReason.NO_CAMERAS_REPORTED);
+                        getCameraHost().onCameraFail(FailureReason.NO_CAMERAS_REPORTED);
                     }
                 }
             }
@@ -217,9 +217,9 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
                 Camera.Size newSize=null;
 
                 try {
-                    if (getHost().getRecordingHint() != CameraHost.RecordingHint.STILL_ONLY) {
+                    if (getCameraHost().getRecordingHint() != CameraHost.RecordingHint.STILL_ONLY) {
                         newSize=
-                                getHost().getPreferredPreviewSizeForVideo(getDisplayOrientation(),
+                                getCameraHost().getPreferredPreviewSizeForVideo(getDisplayOrientation(),
                                         width,
                                         height,
                                         getCameraParameters(),
@@ -228,7 +228,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
 
                     if (newSize == null || newSize.width * newSize.height < 65536) {
                         newSize=
-                                getHost().getPreviewSize(getDisplayOrientation(),
+                                getCameraHost().getPreviewSize(getDisplayOrientation(),
                                         width, height,
                                         getCameraParameters());
                     }
@@ -293,7 +293,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
 
             boolean useFirstStrategy=
                     (width * previewHeight > height * previewWidth);
-            boolean useFullBleed=getHost().useFullBleedPreview();
+            boolean useFullBleed= getCameraHost().useFullBleedPreview();
 
             if ((useFirstStrategy && !useFullBleed)
                     || (!useFirstStrategy && useFullBleed)) {
@@ -340,7 +340,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
     }
 
     public void takePicture(boolean needBitmap, boolean needByteArray) {
-        PictureTransaction xact=new PictureTransaction(getHost());
+        PictureTransaction xact=new PictureTransaction(getCameraHost());
 
         takePicture(xact.needBitmap(needBitmap)
                 .needByteArray(needByteArray));
@@ -434,10 +434,10 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
         try {
             recorder=new MediaRecorder();
             recorder.setCamera(camera);
-            getHost().configureRecorderAudio(cameraId, recorder);
+            getCameraHost().configureRecorderAudio(cameraId, recorder);
             recorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
-            getHost().configureRecorderProfile(cameraId, recorder);
-            getHost().configureRecorderOutput(cameraId, recorder);
+            getCameraHost().configureRecorderProfile(cameraId, recorder);
+            getCameraHost().configureRecorderOutput(cameraId, recorder);
             recorder.setOrientationHint(outputOrientation);
             previewStrategy.attach(recorder);
             recorder.prepare();
@@ -500,8 +500,8 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
     public void onAutoFocus(boolean success, Camera camera) {
         isAutoFocusing=false;
 
-        if (getHost() instanceof AutoFocusCallback) {
-            getHost().onAutoFocus(success, camera);
+        if (getCameraHost() instanceof AutoFocusCallback) {
+            getCameraHost().onAutoFocus(success, camera);
         }
     }
 
@@ -567,7 +567,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
             public void run() {
                 if (camera != null) {
                     try {
-                        if (getHost().getDeviceProfile().isCustomRom()) {
+                        if (getCameraHost().getDeviceProfile().isCustomRom()) {
                             camera.setPreviewCallback(previewCallback);
                         } else {
                             camera.setPreviewCallbackWithBuffer(previewCallback);
@@ -593,9 +593,9 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
 
     public boolean doesZoomReallyWork() {
         Camera.CameraInfo info=new Camera.CameraInfo();
-        Camera.getCameraInfo(getHost().getCameraId(), info);
+        Camera.getCameraInfo(getCameraHost().getCameraId(), info);
 
-        return(getHost().getDeviceProfile().doesZoomActuallyWork(info.facing == CameraInfo.CAMERA_FACING_FRONT));
+        return(getCameraHost().getDeviceProfile().doesZoomActuallyWork(info.facing == CameraInfo.CAMERA_FACING_FRONT));
     }
 
     void previewCreated() {
@@ -607,7 +607,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
                         previewStrategy.attach(camera);
                     }
                     catch (IOException e) {
-                        getHost().handleException(e);
+                        getCameraHost().handleException(e);
                     }
                 }
             }
@@ -652,16 +652,16 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
                     Camera.Parameters parameters = getCameraParametersSync();
 
                     if (previewSize == null) {
-                        previewSize = getHost().getPreviewSize(getDisplayOrientation(), w, h, parameters);
+                        previewSize = getCameraHost().getPreviewSize(getDisplayOrientation(), w, h, parameters);
                     }
 
                     parameters.setPreviewSize(previewSize.width, previewSize.height);
 
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-                        parameters.setRecordingHint(getHost().getRecordingHint() != CameraHost.RecordingHint.STILL_ONLY);
+                        parameters.setRecordingHint(getCameraHost().getRecordingHint() != CameraHost.RecordingHint.STILL_ONLY);
                     }
 
-                    setCameraParametersSync(getHost().adjustPreviewParameters(parameters));
+                    setCameraParametersSync(getCameraHost().adjustPreviewParameters(parameters));
 
                     post(new Runnable() {
                         @Override
@@ -690,7 +690,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
             if (camera != null) {
                 camera.startPreview();
                 inPreview = true;
-                getHost().autoFocusAvailable();
+                getCameraHost().autoFocusAvailable();
             }
         } catch (RuntimeException e) {  //FIXME
             e.printStackTrace();
@@ -710,7 +710,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
         try {
             if (camera != null) {
                 inPreview = false;
-                getHost().autoFocusUnavailable();
+                getCameraHost().autoFocusUnavailable();
                 camera.setPreviewCallback(null);
                 camera.stopPreview();
             }
