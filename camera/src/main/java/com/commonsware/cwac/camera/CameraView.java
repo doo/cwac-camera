@@ -353,24 +353,6 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
                         "Camera cannot take a picture while auto-focusing");
             }
             else {
-                getCameraParametersSync();
-
-                Camera.Parameters pictureParams=camera.getParameters();
-                Camera.Size pictureSize=
-                        xact.host.getPictureSize(xact, pictureParams);
-
-                pictureParams.setPictureSize(pictureSize.width, pictureSize.height);
-                pictureParams.setPictureFormat(ImageFormat.JPEG);
-
-                if (xact.flashMode != null) {
-                    pictureParams.setFlashMode(xact.flashMode);
-                }
-
-                if (!onOrientationChange.isEnabled()) {
-                    setCameraPictureOrientation(pictureParams);
-                }
-
-                camera.setParameters(xact.host.adjustPictureParameters(xact, pictureParams));
                 xact.cameraView=CameraView.this;
 
                 postDelayed(new Runnable() {
@@ -394,6 +376,25 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
             @Override
             public void run() {
                 if (camera != null) {
+                    getCameraParametersSync();
+
+                    Camera.Parameters pictureParams=camera.getParameters();
+                    Camera.Size pictureSize=
+                            xact.host.getPictureSize(xact, pictureParams);
+
+                    pictureParams.setPictureSize(pictureSize.width, pictureSize.height);
+                    pictureParams.setPictureFormat(ImageFormat.JPEG);
+
+                    if (xact.flashMode != null) {
+                        pictureParams.setFlashMode(xact.flashMode);
+                    }
+
+                    if (!onOrientationChange.isEnabled()) {
+                        setCameraPictureOrientation(pictureParams);
+                    }
+
+                    camera.setParameters(xact.host.adjustPictureParameters(xact, pictureParams));
+
                     try {
                         camera.takePicture(xact, null,
                                 new PictureTransactionCallback(xact));
@@ -619,8 +620,10 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
             @Override
             public void run() {
                 if (camera != null) {
-                    previewStopped();
                     camera.setPreviewCallback(null);
+                    if (inPreview) {
+                        stopPreviewSync();
+                    }
                     camera.release();
                     camera = null;
                 }
