@@ -1,36 +1,54 @@
 buildscript {
     repositories {
+        jcenter()
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.9.0'
+        classpath 'com.android.tools.build:gradle:2.2.2'
         classpath 'com.github.dcendents:android-maven-plugin:1.0'
     }
 }
 
-apply plugin: 'android-library'
-apply plugin: 'android-maven'
+apply plugin: 'com.android.library'
+apply plugin: 'maven'
 
-version '0.6.8'
-group 'com.commonsware.cwac'
+version '0.6.19-SNAPSHOT'
+group 'com.commonsware.cwac.camera'
+
+def publishArtifactId = 'camera'
 
 repositories {
-  // mavenCentral()
+    jcenter()
+    mavenCentral()
+
+    maven {
+        url 'http://nexus.scanbot.io/nexus/content/repositories/releases/'
+    }
+    maven {
+        url 'http://nexus.scanbot.io/nexus/content/repositories/snapshots/'
+    }
+    maven {
+        url 'https://oss.sonatype.org/content/repositories/releases/'
+    }
+    maven {
+        url 'https://oss.sonatype.org/content/repositories/snapshots/'
+    }
+    maven {
+        url "https://s3.amazonaws.com/repo.commonsware.com"
+    }
 }
 
 dependencies {
     compile fileTree(dir: 'libs', include: '*.jar')
-    // compile 'com.android.support:support-v4:18.0.+'
-    // compile 'com.actionbarsherlock:actionbarsherlock:4.4.0@aar'
+    compile 'com.android.support:support-v4:19.+'
 }
 
 android {
-    compileSdkVersion 17
-    buildToolsVersion "19.0.1"
+    compileSdkVersion 21
+    buildToolsVersion '24.0.1'
 
     sourceSets {
         main {
-            manifest.srcFile 'AndroidManifest.xml'
             java.srcDirs = ['src']
             resources.srcDirs = ['src']
             aidl.srcDirs = ['src']
@@ -45,14 +63,30 @@ android {
 }
 
 // from http://stackoverflow.com/a/19484146/115145
-
 android.libraryVariants.all { variant ->
   def name = variant.buildType.name
-  if (name.equals(com.android.builder.BuilderConstants.DEBUG)) {
+  if (name.equals(com.android.builder.core.BuilderConstants.DEBUG)) {
     return; // Skip debug builds.
   }
   def task = project.tasks.create "jar${name.capitalize()}", Jar
   task.dependsOn variant.javaCompile
   task.from variant.javaCompile.destinationDir
 	task.archiveName = "cwac-${task.archiveName}"
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            snapshotRepository(url: "http://nexus.scanbot.io/nexus/content/repositories/snapshots/") {
+                authentication(userName: project.getProperty('NEXUS_LOGIN'), password: project.getProperty('NEXUS_PASSWORD'))
+            }
+            repository(url: "http://nexus.scanbot.io/nexus/content/repositories/releases/") {
+                authentication(userName: project.getProperty('NEXUS_LOGIN'), password: project.getProperty('NEXUS_PASSWORD'))
+            }
+
+            pom.version = project.version
+            pom.artifactId = publishArtifactId
+            pom.groupId = project.group
+        }
+    }
 }
