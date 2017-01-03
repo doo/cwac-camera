@@ -393,9 +393,9 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
                         setCameraPictureOrientation(pictureParams);
                     }
 
-                    camera.setParameters(xact.host.adjustPictureParameters(xact, pictureParams));
 
                     try {
+                        camera.setParameters(xact.host.adjustPictureParameters(xact, pictureParams));
                         camera.takePicture(xact, null,
                                 new PictureTransactionCallback(xact));
                     }
@@ -474,7 +474,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
                         camera.autoFocus(CameraView.this);
                         isAutoFocusing = true;
                     } catch (RuntimeException e) {
-                        android.util.Log.e(getClass().getSimpleName(), "Could not auto focus?", e);
+                        Log.e(getClass().getSimpleName(), "Could not auto focus?", e);
                     }
 
                 }
@@ -487,7 +487,11 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
             @Override
             public void run() {
                 if (camera != null) {
-                    camera.cancelAutoFocus();
+                    try {
+                        camera.cancelAutoFocus();
+                    } catch (RuntimeException e) {
+                        Log.e(getClass().getSimpleName(), "Could not cancel auto focus?", e);
+                    }
                 }
             }
         });
@@ -768,7 +772,11 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
                         stopPreviewSync();
                     }
 
-                    camera.setDisplayOrientation(displayOrientation);
+                    try {
+                        camera.setDisplayOrientation(displayOrientation);
+                    } catch (RuntimeException e) {
+                        e.printStackTrace();
+                    }
 
                     if (wasInPreview) {
                         startPreviewSync();
