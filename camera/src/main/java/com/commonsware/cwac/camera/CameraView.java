@@ -177,7 +177,11 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
             @Override
             public void run() {
                 if (camera == null) {
-                    cameraId = getCameraHost().getCameraId();
+                    try {
+                        cameraId = getCameraHost().getCameraId();
+                    } catch (RuntimeException e) {
+                        getCameraHost().onCameraFail(FailureReason.UNKNOWN);
+                    }
 
                     if (cameraId >= 0) {
                         try {
@@ -611,7 +615,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
                     try {
                         previewStrategy.attach(camera);
                     }
-                    catch (IOException e) {
+                    catch (IOException | RuntimeException e) {
                         getCameraHost().handleException(e);
                     }
                 }
