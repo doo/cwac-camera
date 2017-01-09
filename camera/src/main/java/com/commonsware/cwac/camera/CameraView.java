@@ -337,6 +337,23 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
         });
     }
 
+    public void lockToPortrait(boolean enable) {
+        if (enable) {
+            getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT);
+            onOrientationChange.enable();
+        } else {
+            getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+            onOrientationChange.disable();
+        }
+
+        post(new Runnable() {
+            @Override
+            public void run() {
+                setCameraDisplayOrientation();
+            }
+        });
+    }
+
     public void restartPreview() {
         if (!inPreview) {
             startPreview();
