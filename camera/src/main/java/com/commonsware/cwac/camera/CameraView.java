@@ -319,15 +319,9 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
         return(displayOrientation);
     }
 
-    public void lockToLandscape(boolean enable) {
-        if (enable) {
-            getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
-            onOrientationChange.enable();
-        }
-        else {
-            getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
-            onOrientationChange.disable();
-        }
+    public void lockToLandscape() {
+        getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
+        onOrientationChange.enable();
 
         post(new Runnable() {
             @Override
@@ -337,14 +331,21 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
         });
     }
 
-    public void lockToPortrait(boolean enable) {
-        if (enable) {
-            getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT);
-            onOrientationChange.enable();
-        } else {
-            getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
-            onOrientationChange.disable();
-        }
+    public void lockToPortrait() {
+        getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT);
+        onOrientationChange.enable();
+
+        post(new Runnable() {
+            @Override
+            public void run() {
+                setCameraDisplayOrientation();
+            }
+        });
+    }
+
+    public void unlockOrientation() {
+        getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+        onOrientationChange.disable();
 
         post(new Runnable() {
             @Override
