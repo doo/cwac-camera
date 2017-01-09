@@ -203,13 +203,16 @@ public class CameraFragment extends Fragment {
    * Call this to lock the camera to landscape mode (with a
    * parameter of true), regardless of what the actual
    * screen orientation is.
-   * 
-   * @param enable
-   *          true to lock the camera to landscape, false to
-   *          allow normal rotation
    */
-  public void lockToLandscape(boolean enable) {
-    cameraView.lockToLandscape(enable);
+  public void lockToLandscape() {
+    cameraView.lockToLandscape();
+  }
+
+  /**
+   * Call this to set the camera to unspecified orientation mode.
+   */
+  public void unlocklockOrientation() {
+    cameraView.unlockOrientation();
   }
 
   /**
