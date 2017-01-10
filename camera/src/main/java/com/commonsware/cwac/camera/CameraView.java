@@ -678,19 +678,24 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
             @Override
             public void run() {
                 if (camera != null) {
-                    Camera.Parameters parameters = getCameraParametersSync();
+                    try {
+                        Camera.Parameters parameters = getCameraParametersSync();
+                        if (previewSize == null) {
+                            previewSize = getCameraHost().getPreviewSize(getDisplayOrientation(), w, h, parameters);
+                        }
 
-                    if (previewSize == null) {
-                        previewSize = getCameraHost().getPreviewSize(getDisplayOrientation(), w, h, parameters);
+                        parameters.setPreviewSize(previewSize.width, previewSize.height);
+
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+                            parameters.setRecordingHint(getCameraHost().getRecordingHint() != CameraHost.RecordingHint.STILL_ONLY);
+                        }
+
+                        setCameraParametersSync(getCameraHost().adjustPreviewParameters(parameters));
+                    } catch (Exception e) {
+                        android.util.Log.e(getClass().getSimpleName(),
+                                "Could not work with camera parameters?",
+                                e);
                     }
-
-                    parameters.setPreviewSize(previewSize.width, previewSize.height);
-
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-                        parameters.setRecordingHint(getCameraHost().getRecordingHint() != CameraHost.RecordingHint.STILL_ONLY);
-                    }
-
-                    setCameraParametersSync(getCameraHost().adjustPreviewParameters(parameters));
 
                     post(new Runnable() {
                         @Override
