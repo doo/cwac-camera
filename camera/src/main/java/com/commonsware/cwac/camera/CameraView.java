@@ -105,6 +105,14 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
     }
 
     public Camera.Parameters getCameraParameters() {
+        if (camera != null) {
+            try {
+                return camera.getParameters();
+            } catch (RuntimeException e) {
+                android.util.Log.e(getClass().getSimpleName(), "Could not work with camera parameters?", e);
+            }
+        }
+
         return previewParams;
     }
 
@@ -511,6 +519,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
                 if (camera != null) {
                     try {
                         camera.cancelAutoFocus();
+                        isAutoFocusing = false;
                     } catch (RuntimeException e) {
                         Log.e(getClass().getSimpleName(), "Could not cancel auto focus?", e);
                     }
@@ -934,12 +943,8 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
 
         @Override
         public void onPictureTaken(byte[] data, Camera camera) {
-            if (previewParams != null && camera != null) {
-                try {
-                    camera.setParameters(previewParams);
-                } catch (RuntimeException e) {
-                    Log.e(getClass().getSimpleName(), "Could not set camera parameters!", e);
-                }
+            if (previewParams != null) {
+                CameraView.this.setCameraParameters(previewParams);
             }
 
             if (data != null) {
