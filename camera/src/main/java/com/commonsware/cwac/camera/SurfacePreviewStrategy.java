@@ -49,6 +49,7 @@ class SurfacePreviewStrategy implements PreviewStrategy,
 
   @Override
   public void surfaceDestroyed(SurfaceHolder holder) {
+    previewHolder.removeCallback(this);
     cameraView.previewDestroyed();
   }
 

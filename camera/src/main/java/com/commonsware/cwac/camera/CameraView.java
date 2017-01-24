@@ -648,11 +648,18 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
             @Override
             public void run() {
                 if (camera != null) {
-                    camera.setPreviewCallback(null);
-                    if (inPreview) {
-                        stopPreviewSync();
+                    try {
+                        if (inPreview) {
+                            stopPreviewSync();
+                        } else {
+                            camera.setPreviewCallback(null);
+                        }
+                        camera.release();
+                    } catch (RuntimeException e) {
+                        android.util.Log.e(getClass().getSimpleName(),
+                                "Could not release camera.",
+                                e);
                     }
-                    camera.release();
                     camera = null;
                 }
             }
