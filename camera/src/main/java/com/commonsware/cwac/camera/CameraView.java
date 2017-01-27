@@ -128,7 +128,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
      * Run only in executor
      * @param parameters
      */
-    private void setCameraParametersSync(Camera.Parameters parameters) {
+    protected void setCameraParametersSync(Camera.Parameters parameters) {
         try {
             if (camera != null && parameters != null) {
 
@@ -329,7 +329,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
         post(new Runnable() {
             @Override
             public void run() {
-                setCameraDisplayOrientation();
+                setCameraDisplayOrientationAsync();
             }
         });
     }
@@ -341,7 +341,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
         post(new Runnable() {
             @Override
             public void run() {
-                setCameraDisplayOrientation();
+                setCameraDisplayOrientationAsync();
             }
         });
     }
@@ -353,7 +353,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
         post(new Runnable() {
             @Override
             public void run() {
-                setCameraDisplayOrientation();
+                setCameraDisplayOrientationAsync();
             }
         });
     }
@@ -589,23 +589,13 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
         }
     }
 
-    public void setPreviewCallback(Camera.PreviewCallback callback) {
+    public void setPreviewCallback(final Camera.PreviewCallback callback) {
         previewCallback = callback;
 
         cameraExecutor.execute(new Runnable() {
             @Override
             public void run() {
-                if (camera != null) {
-                    try {
-                        if (getCameraHost().getDeviceProfile().isCustomRom()) {
-                            camera.setPreviewCallback(previewCallback);
-                        } else {
-                            camera.setPreviewCallbackWithBuffer(previewCallback);
-                        }
-                    } catch (RuntimeException e) {
-                        e.printStackTrace();
-                    }
-                }
+                setPreviewCallbackSync(callback);
             }
         });
     }
@@ -614,11 +604,31 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
         cameraExecutor.execute(new Runnable() {
             @Override
             public void run() {
-                if (camera != null && buffer != null) {
-                    camera.addCallbackBuffer(buffer);
-                }
+                addPreviewCallbackBufferSync(buffer);
             }
         });
+    }
+
+    protected void setPreviewCallbackSync(Camera.PreviewCallback callback) {
+        previewCallback = callback;
+
+        if (camera != null) {
+            try {
+                if (getCameraHost().getDeviceProfile().isCustomRom()) {
+                    camera.setPreviewCallback(previewCallback);
+                } else {
+                    camera.setPreviewCallbackWithBuffer(previewCallback);
+                }
+            } catch (RuntimeException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    protected void addPreviewCallbackBufferSync(final byte[] buffer) {
+        if (camera != null && buffer != null) {
+            camera.addCallbackBuffer(buffer);
+        }
     }
 
     public boolean doesZoomReallyWork() {
@@ -713,7 +723,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
                         }
                     });
 
-                    startPreview();
+                    startPreviewSync();
                 }
             }
         });
@@ -728,7 +738,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
         });
     }
 
-    private void startPreviewSync() {
+    protected void startPreviewSync() {
         try {
             if (camera != null) {
                 camera.startPreview();
@@ -760,6 +770,15 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
         } catch (RuntimeException e) {  //FIXME
             e.printStackTrace();
         }
+    }
+
+    private void setCameraDisplayOrientationAsync() {
+        cameraExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                setCameraDisplayOrientation();
+            }
+        });
     }
 
     // based on
@@ -797,28 +816,23 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
             displayOrientation = (info.orientation - degrees + 360) % 360;
         }
 
-        cameraExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                if (camera != null) {
-                    boolean wasInPreview = inPreview;
+        if (camera != null) {
+            boolean wasInPreview = inPreview;
 
-                    if (inPreview) {
-                        stopPreviewSync();
-                    }
-
-                    try {
-                        camera.setDisplayOrientation(displayOrientation);
-                    } catch (RuntimeException e) {
-                        e.printStackTrace();
-                    }
-
-                    if (wasInPreview) {
-                        startPreviewSync();
-                    }
-                }
+            if (inPreview) {
+                stopPreviewSync();
             }
-        });
+
+            try {
+                camera.setDisplayOrientation(displayOrientation);
+            } catch (RuntimeException e) {
+                e.printStackTrace();
+            }
+
+            if (wasInPreview) {
+                startPreviewSync();
+            }
+        }
     }
 
     private void setCameraPictureOrientation(Camera.Parameters params) {
