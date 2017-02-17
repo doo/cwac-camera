@@ -211,6 +211,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
         if (previewStrategy.getWidget() != null) {
             removeView(previewStrategy.getWidget());
         }
+        this.onOrientationChange.disable();
     }
 
     // based on CameraPreview.java from ApiDemos
@@ -672,6 +673,8 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
                     }
                     camera = null;
                 }
+
+                CameraView.this.onOrientationChange.disable();
             }
         });
     }
