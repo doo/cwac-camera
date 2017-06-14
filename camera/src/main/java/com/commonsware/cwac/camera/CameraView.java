@@ -177,6 +177,10 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     public void onResume() {
         onOrientationChange.resetOrientation();
+        ViewGroup parent = (ViewGroup) previewStrategy.getWidget().getParent();
+        if (parent != null) {
+            parent.removeAllViews();
+        }
         addView(previewStrategy.getWidget());
 
 
