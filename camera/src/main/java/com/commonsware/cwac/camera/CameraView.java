@@ -23,15 +23,18 @@ import android.graphics.ImageFormat;
 import android.hardware.Camera;
 import android.hardware.Camera.AutoFocusCallback;
 import android.hardware.Camera.CameraInfo;
+import android.hardware.SensorManager;
 import android.media.MediaRecorder;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Display;
 import android.view.OrientationEventListener;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 
 import java.io.IOException;
 import java.util.concurrent.Executor;
@@ -61,6 +64,9 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
     private Camera.PreviewCallback previewCallback;
 
     private static final Executor cameraExecutor = Executors.newSingleThreadExecutor();
+    private OrientationEventListener orientationEventListener;
+    private int lastRotation;
+    private WindowManager windowManager;
 
     public CameraView(Context context) {
         super(context);
@@ -172,6 +178,27 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
         }
 
         setPreviewCallback(previewCallback);
+
+        if (orientationEventListener == null) {
+            windowManager = (WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE);
+            orientationEventListener = new OrientationEventListener(getContext(),
+                    SensorManager.SENSOR_DELAY_NORMAL) {
+                @Override
+                public void onOrientationChanged(int orientation) {
+
+                    Display display = windowManager.getDefaultDisplay();
+                    int rotation = display.getRotation();
+                    if (rotation != lastRotation) {
+                        setCameraDisplayOrientation();
+
+                        lastRotation = rotation;
+                    }
+                }
+            };
+        }
+        if (orientationEventListener.canDetectOrientation()) {
+            orientationEventListener.enable();
+        }
     }
 
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
@@ -216,6 +243,9 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
             removeView(previewStrategy.getWidget());
         }
         this.onOrientationChange.disable();
+        if (orientationEventListener != null) {
+            orientationEventListener.disable();
+        }
     }
 
     // based on CameraPreview.java from ApiDemos
