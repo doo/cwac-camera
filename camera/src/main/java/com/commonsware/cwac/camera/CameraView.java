@@ -114,7 +114,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
             try {
                 return camera.getParameters();
             } catch (RuntimeException e) {
-                android.util.Log.e(getClass().getSimpleName(), "Could not work with camera parameters?", e);
+                android.util.Log.v(getClass().getSimpleName(), "getCameraParameters(). Could not work with camera parameters.");
             }
         }
 
@@ -142,8 +142,9 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
 
             }
             previewParams = parameters;
-        } catch (RuntimeException e) {  //FIXME
-            e.printStackTrace();
+        } catch (RuntimeException e) {
+            android.util.Log.v(getClass().getSimpleName(),
+                    "setCameraParametersSync(). Could not set camera parameters.");
         }
     }
 
@@ -155,7 +156,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
             try {
                 previewParams = camera.getParameters();
             } catch (RuntimeException e) {
-                android.util.Log.e(getClass().getSimpleName(), "Could not work with camera parameters?", e);
+                android.util.Log.v(getClass().getSimpleName(), "getCameraParametersSync(). Could not work with camera parameters.", e);
             }
         }
         return previewParams;
@@ -279,10 +280,8 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
                                         getCameraParameters());
                     }
                 } catch (Exception e) {
-                    android.util.Log.e(getClass().getSimpleName(),
-                            "Could not work with camera parameters?",
-                            e);
-                    // TODO get this out to library clients
+                    android.util.Log.v(getClass().getSimpleName(),
+                            "onMeasure(). Could not work with camera parameters.");
                 }
 
                 if (newSize != null) {
@@ -655,7 +654,8 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
                     camera.setPreviewCallbackWithBuffer(previewCallback);
                 }
             } catch (RuntimeException e) {
-                e.printStackTrace();
+                android.util.Log.v(getClass().getSimpleName(),
+                        "setPreviewCallbackSync(). Could not set preview callback.");
             }
         }
     }
@@ -748,9 +748,8 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
 
                         setCameraParametersSync(getCameraHost().adjustPreviewParameters(parameters));
                     } catch (Exception e) {
-                        android.util.Log.e(getClass().getSimpleName(),
-                                "Could not work with camera parameters?",
-                                e);
+                        android.util.Log.v(getClass().getSimpleName(),
+                                "initPreview(). Could not work with camera parameters.");
                     }
 
                     post(new Runnable() {
@@ -782,8 +781,9 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
                 inPreview = true;
                 getCameraHost().autoFocusAvailable();
             }
-        } catch (RuntimeException e) {  //FIXME
-            e.printStackTrace();
+        } catch (RuntimeException e) {
+            android.util.Log.v(getClass().getSimpleName(),
+                    "startPreviewSync(). Could not start preview.");
         }
     }
 
@@ -805,7 +805,8 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
                 camera.stopPreview();
             }
         } catch (RuntimeException e) {  //FIXME
-            e.printStackTrace();
+            android.util.Log.v(getClass().getSimpleName(),
+                    "stopPreviewSync(). Could not stop preview.");
         }
     }
 
@@ -863,7 +864,8 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
             try {
                 camera.setDisplayOrientation(displayOrientation);
             } catch (RuntimeException e) {
-                e.printStackTrace();
+                android.util.Log.v(getClass().getSimpleName(),
+                        "setCameraDisplayOrientation(). Could not set camera display orientation.");
             }
 
             if (wasInPreview) {
@@ -942,12 +944,8 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
                 Camera.Parameters params = getCameraParametersSync();
 
                 params.setRotation(outputOrientation);
-                try {
-                    setCameraParametersSync(params);
-                    currentOrientation = orientation;
-                } catch (RuntimeException e) {
-                    e.printStackTrace();
-                }
+                setCameraParametersSync(params);
+                currentOrientation = orientation;
             }
         }
 
