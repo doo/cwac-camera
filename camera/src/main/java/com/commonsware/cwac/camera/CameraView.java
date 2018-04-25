@@ -68,6 +68,8 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
     private int lastRotation;
     private WindowManager windowManager;
 
+    private boolean isOrientationHardLocked = false;
+
     public CameraView(Context context) {
         super(context);
 
@@ -167,7 +169,8 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
      * @param camera
      */
     public void onCameraOpen(Camera camera) throws RuntimeException {
-        if (getActivity().getRequestedOrientation() != ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED) {
+        if (getActivity().getRequestedOrientation() != ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+                && !isOrientationHardLocked) {
             onOrientationChange.enable();
         }
 
@@ -358,26 +361,38 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
 
     public void lockToLandscape() {
         getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
-        onOrientationChange.enable();
 
         post(new Runnable() {
             @Override
             public void run() {
                 setCameraDisplayOrientationAsync();
+                if (!isOrientationHardLocked) {
+                    onOrientationChange.enable();
+                } else {
+                    setPictureOrientationAsync();
+                }
             }
         });
     }
 
     public void lockToPortrait() {
         getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT);
-        onOrientationChange.enable();
 
         post(new Runnable() {
             @Override
             public void run() {
                 setCameraDisplayOrientationAsync();
+                if (!isOrientationHardLocked) {
+                    onOrientationChange.enable();
+                } else {
+                    setPictureOrientationAsync();
+                }
             }
         });
+    }
+
+    public void setOrientationHardLock(boolean orientationHardLock) {
+        this.isOrientationHardLocked = orientationHardLock;
     }
 
     public void unlockOrientation() {
@@ -819,6 +834,19 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
         });
     }
 
+    private void setPictureOrientationAsync() {
+        cameraExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                Camera.Parameters parameters = getCameraParametersSync();
+                if (parameters != null) {
+                    setCameraPictureOrientation(parameters);
+                    setCameraParametersSync(parameters);
+                }
+            }
+        });
+    }
+
     // based on
     // http://developer.android.com/reference/android/hardware/Camera.html#setDisplayOrientation(int)
     // and http://stackoverflow.com/a/10383164/115145
@@ -879,7 +907,8 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
 
         Camera.getCameraInfo(cameraId, info);
 
-        if (getActivity().getRequestedOrientation() != ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED) {
+        if (getActivity().getRequestedOrientation() != ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+                && !isOrientationHardLocked) {
             outputOrientation =
                     getCameraPictureRotation(getActivity().getWindowManager()
                             .getDefaultDisplay()
