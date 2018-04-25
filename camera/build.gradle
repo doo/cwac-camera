@@ -12,7 +12,7 @@ buildscript {
 apply plugin: 'com.android.library'
 apply plugin: 'maven'
 
-version '0.6.25.9'
+version '0.6.26'
 group 'com.commonsware.cwac.camera'
 
 def publishArtifactId = 'camera'
