@@ -68,6 +68,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
     private int lastRotation;
     private WindowManager windowManager;
 
+    private boolean isOrientationLocked = false;
     private boolean isOrientationHardLocked = false;
 
     public CameraView(Context context) {
@@ -190,6 +191,10 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
         }
         if (orientationEventListener.canDetectOrientation()) {
             orientationEventListener.enable();
+        }
+
+        if (this.isOrientationLocked) {
+            lockOrientation();
         }
     }
 
@@ -360,25 +365,35 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
         return (displayOrientation);
     }
 
+    @Deprecated
     public void lockToLandscape() {
         getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
 
-        post(new Runnable() {
-            @Override
-            public void run() {
-                setCameraDisplayOrientationAsync();
-                if (!isOrientationHardLocked) {
-                    onOrientationChange.enable();
-                } else {
-                    setPictureOrientationAsync();
-                }
-            }
-        });
+        lockOrientation();
     }
 
+    @Deprecated
     public void lockToPortrait() {
         getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT);
 
+        lockOrientation();
+    }
+
+    public void lockToLandscape(boolean lockPicture) {
+        getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
+
+        this.isOrientationLocked = true;
+        this.isOrientationHardLocked = lockPicture;
+    }
+
+    public void lockToPortrait(boolean lockPicture) {
+        getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT);
+
+        this.isOrientationLocked = true;
+        this.isOrientationHardLocked = lockPicture;
+    }
+
+    private void lockOrientation() {
         post(new Runnable() {
             @Override
             public void run() {
@@ -392,11 +407,9 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
         });
     }
 
-    public void setOrientationHardLock(boolean orientationHardLock) {
-        this.isOrientationHardLocked = orientationHardLock;
-    }
-
     public void unlockOrientation() {
+        this.isOrientationLocked = false;
+        this.isOrientationHardLocked = false;
         getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
         onOrientationChange.disable();
 
