@@ -56,7 +56,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
     private OnOrientationChange onOrientationChange = null;
     private int displayOrientation = -1;
     private int outputOrientation = -1;
-    private int cameraId = -1;
+    private int cameraId = 0;
     private MediaRecorder recorder = null;
     private Camera.Parameters previewParams = null;
     private boolean isDetectingFaces = false;
@@ -158,6 +158,8 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
      * @param camera
      */
     public void onCameraOpen(Camera camera) throws RuntimeException {
+        setPictureSizeAsync();
+
         if (getActivity().getRequestedOrientation() != ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
                 && !isOrientationHardLocked) {
             onOrientationChange.enable();
@@ -213,25 +215,34 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
             public void run() {
                 if (camera == null) {
                     try {
-                        cameraId = getCameraHost().getCameraId();
-                    } catch (RuntimeException e) {
-                        getCameraHost().onCameraFail(FailureReason.UNKNOWN);
-                    }
-
-                    if (cameraId >= 0) {
-                        try {
-                            camera = Camera.open(cameraId);
-                            getCameraParameters(); //sets previewParams
-                            onCameraOpen(camera);
-                        } catch (Exception e) {
-                            getCameraHost().onCameraFail(FailureReason.UNKNOWN);
+                        camera = getCameraInstance();
+                        if (camera == null) {
+                            return;
                         }
-                    } else {
-                        getCameraHost().onCameraFail(FailureReason.NO_CAMERAS_REPORTED);
+                        getCameraParameters(); //sets previewParams
+                        onCameraOpen(camera);
+                    } catch (Exception e) {
+                        getCameraHost().onCameraFail(FailureReason.UNKNOWN);
                     }
                 }
             }
         });
+    }
+
+    public Camera getCameraInstance() {
+        Camera openedCamera = null;
+        try {
+            openedCamera = Camera.open();
+            if (openedCamera == null) {
+                openedCamera = Camera.open(Camera.getNumberOfCameras() - 1);
+                if (openedCamera != null) {
+                    this.cameraId = Camera.getNumberOfCameras() - 1;
+                }
+            }
+        } catch (Exception e) {
+            getCameraHost().onCameraFail(FailureReason.NO_CAMERAS_REPORTED);
+        }
+        return openedCamera;
     }
 
     public void onPause() {
@@ -471,15 +482,6 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
                 getCameraParameters();
 
                 Camera.Parameters pictureParams = camera.getParameters();
-                Camera.Size pictureSize =
-                        xact.host.getPictureSize(xact, pictureParams);
-
-                pictureParams.setPictureSize(pictureSize.width, pictureSize.height);
-                pictureParams.setPictureFormat(ImageFormat.JPEG);
-
-                if (xact.flashMode != null) {
-                    pictureParams.setFlashMode(xact.flashMode);
-                }
 
                 if (!onOrientationChange.isEnabled()) {
                     setCameraPictureOrientation(pictureParams);
@@ -855,6 +857,20 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
                 Camera.Parameters parameters = getCameraParameters();
                 if (parameters != null) {
                     setCameraPictureOrientation(parameters);
+                    setCameraParametersSync(parameters);
+                }
+            }
+        });
+    }
+
+    private void setPictureSizeAsync() {
+        cameraExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                Camera.Parameters parameters = getCameraParameters();
+                if (parameters != null) {
+                    Camera.Size pictureSize = CameraView.this.host.getPictureSize(null, parameters);
+                    parameters.setPictureSize(pictureSize.width, pictureSize.height);
                     setCameraParametersSync(parameters);
                 }
             }
