@@ -478,7 +478,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
 
 
                 camera.setParameters(xact.host.adjustPictureParameters(xact, pictureParams));
-                camera.takePicture(xact, null,
+                camera.takePicture(xact.host.getShutterCallback(), null,
                         new PictureTransactionCallback(xact));
             } catch (Exception e) {
                 Log.e(getClass().getSimpleName(),
