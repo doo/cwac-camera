@@ -95,7 +95,6 @@ abstract public class DeviceProfile {
             || isCyanogenMod()
             || isOmni()
             || isAchiDroid()
-            || isMIUI()
             || isSlimKat();
   }
 
