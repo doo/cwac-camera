@@ -92,7 +92,6 @@ abstract public class DeviceProfile {
 
   public boolean isCustomRom() {
     return usesTestKeys()
-            || isCyanogenMod()
             || isOmni()
             || isAchiDroid()
             || isSlimKat();
