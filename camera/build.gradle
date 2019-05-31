@@ -13,7 +13,7 @@ buildscript {
 apply plugin: 'com.android.library'
 apply plugin: 'maven'
 
-version '0.6.32'
+version '0.6.33'
 group 'com.commonsware.cwac.camera'
 
 def publishArtifactId = 'camera'
@@ -42,25 +42,16 @@ repositories {
 
 dependencies {
     api fileTree(dir: 'libs', include: '*.jar')
-    api 'com.android.support:support-v4:27.1.0'
+    api 'androidx.legacy:legacy-support-v4:1.0.0'
 }
 
 android {
     compileSdkVersion 28
     buildToolsVersion '28.0.3'
 
-    sourceSets {
-        main {
-            java.srcDirs = ['src/main/java']
-            resources.srcDirs = ['src']
-            aidl.srcDirs = ['src']
-            renderscript.srcDirs = ['src']
-            res.srcDirs = ['src/main/res']
-            assets.srcDirs = ['assets']
-        }
-
-        debug.setRoot('build-types/debug')
-        release.setRoot('build-types/release')
+    defaultConfig {
+        minSdkVersion 15
+        targetSdkVersion 28
     }
 }
 

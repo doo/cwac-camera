@@ -43,13 +43,18 @@ repositories {
 
 dependencies {
     api project(':camera')
-    api 'com.android.support:support-v4:18.0.+'
+    api 'androidx.legacy:legacy-support-v4:1.0.0'
     api 'com.actionbarsherlock:actionbarsherlock:4.4.0@aar'
 }
 
 android {
     compileSdkVersion 28
     buildToolsVersion '28.0.3'
+
+    defaultConfig {
+        minSdkVersion 15
+        targetSdkVersion 28
+    }
 
     sourceSets {
         main {
