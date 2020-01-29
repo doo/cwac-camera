@@ -419,8 +419,10 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
     public void unlockOrientation() {
         this.isOrientationLocked = false;
         this.isOrientationHardLocked = false;
-
-        // getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+        Context context = getContext();
+        if (context instanceof Activity) {
+            ((Activity) context).setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+        }
         onOrientationChange.disable();
 
         post(new Runnable() {
