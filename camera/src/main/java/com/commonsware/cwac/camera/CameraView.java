@@ -19,6 +19,7 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.graphics.ImageFormat;
 import android.hardware.Camera;
 import android.hardware.Camera.AutoFocusCallback;
@@ -158,7 +159,8 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
      * @param camera
      */
     public void onCameraOpen(Camera camera) throws RuntimeException {
-        if (getActivity().getRequestedOrientation() != ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+        windowManager = (WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE);
+        if (getContext().getResources().getConfiguration().orientation != Configuration.ORIENTATION_UNDEFINED
                 && !isOrientationHardLocked) {
             onOrientationChange.enable();
         }
@@ -173,7 +175,6 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
         setPreviewCallback(previewCallback);
 
         if (orientationEventListener == null) {
-            windowManager = (WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE);
             orientationEventListener = new OrientationEventListener(getContext(),
                     SensorManager.SENSOR_DELAY_NORMAL) {
                 @Override
@@ -367,28 +368,36 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
 
     @Deprecated
     public void lockToLandscape() {
-        getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
-
+        Context context = getContext();
+        if (context instanceof Activity) {
+            ((Activity) context).setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
+        }
         lockOrientation();
     }
 
     @Deprecated
     public void lockToPortrait() {
-        getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT);
-
+        Context context = getContext();
+        if (context instanceof Activity) {
+            ((Activity) context).setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT);
+        }
         lockOrientation();
     }
 
     public void lockToLandscape(boolean lockPicture) {
-        getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
-
+        Context context = getContext();
+        if (context instanceof Activity) {
+            ((Activity) context).setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
+        }
         this.isOrientationLocked = true;
         this.isOrientationHardLocked = lockPicture;
     }
 
     public void lockToPortrait(boolean lockPicture) {
-        getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT);
-
+        Context context = getContext();
+        if (context instanceof Activity) {
+            ((Activity) context).setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT);
+        }
         this.isOrientationLocked = true;
         this.isOrientationHardLocked = lockPicture;
     }
@@ -410,7 +419,10 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
     public void unlockOrientation() {
         this.isOrientationLocked = false;
         this.isOrientationHardLocked = false;
-        getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+        Context context = getContext();
+        if (context instanceof Activity) {
+            ((Activity) context).setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+        }
         onOrientationChange.disable();
 
         post(new Runnable() {
@@ -858,12 +870,13 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
 
     private void setCameraDisplayOrientation() {
         Camera.CameraInfo info = new Camera.CameraInfo();
-        int rotation = getActivity().getWindowManager().getDefaultDisplay().getRotation();
+        Display defaultDisplay = windowManager.getDefaultDisplay();
+        int rotation = defaultDisplay.getRotation();
         int degrees = 0;
         DisplayMetrics dm = new DisplayMetrics();
 
         Camera.getCameraInfo(cameraId, info);
-        getActivity().getWindowManager().getDefaultDisplay().getMetrics(dm);
+        defaultDisplay.getMetrics(dm);
 
         switch (rotation) {
             case Surface.ROTATION_0:
@@ -912,10 +925,10 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
 
         Camera.getCameraInfo(cameraId, info);
 
-        if (getActivity().getRequestedOrientation() != ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+        if (getContext().getResources().getConfiguration().orientation != Configuration.ORIENTATION_UNDEFINED
                 && !isOrientationHardLocked) {
             outputOrientation =
-                    getCameraPictureRotation(getActivity().getWindowManager()
+                    getCameraPictureRotation(windowManager
                             .getDefaultDisplay()
                             .getOrientation());
         } else if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
@@ -944,10 +957,6 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
         }
 
         return (rotation);
-    }
-
-    Activity getActivity() {
-        return ((Activity) getContext());
     }
 
     private class OnOrientationChange extends OrientationEventListener {
