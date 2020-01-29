@@ -959,10 +959,6 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
         return (rotation);
     }
 
-   /* Activity getActivity() {
-        return ((Activity) getContext());
-    }*/
-
     private class OnOrientationChange extends OrientationEventListener {
 
         private int currentOrientation = ORIENTATION_UNKNOWN;
