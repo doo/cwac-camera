@@ -160,7 +160,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
      */
     public void onCameraOpen(Camera camera) throws RuntimeException {
         windowManager = (WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE);
-        if (getContext().getResources().getConfiguration().orientation != Configuration.ORIENTATION_UNDEFINED
+        if (isOrientationLocked
                 && !isOrientationHardLocked) {
             onOrientationChange.enable();
         }
@@ -925,7 +925,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
 
         Camera.getCameraInfo(cameraId, info);
 
-        if (getContext().getResources().getConfiguration().orientation != Configuration.ORIENTATION_UNDEFINED
+        if (isOrientationLocked
                 && !isOrientationHardLocked) {
             outputOrientation =
                     getCameraPictureRotation(windowManager
