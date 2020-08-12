@@ -28,7 +28,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import com.android.mms.exif.ExifInterface;
 
-public class ImageCleanupTask extends Thread {
+public class ImageCleanupTask  {
   private byte[] data;
   private int cameraId;
   private PictureTransaction xact=null;
@@ -45,7 +45,6 @@ public class ImageCleanupTask extends Thread {
     applyMatrix=(heapPct < xact.host.maxPictureCleanupHeapUsage());
   }
 
-  @Override
   public void run() {
     Camera.CameraInfo info=new Camera.CameraInfo();
 

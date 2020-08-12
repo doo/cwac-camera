@@ -19,7 +19,6 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
-import android.graphics.ImageFormat;
 import android.hardware.Camera;
 import android.hardware.Camera.AutoFocusCallback;
 import android.hardware.Camera.CameraInfo;
@@ -41,6 +40,8 @@ import android.view.WindowManager;
 import com.commonsware.cwac.camera.CameraHost.FailureReason;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class CameraView extends ViewGroup implements AutoFocusCallback {
 
@@ -64,6 +65,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
     private Camera.PreviewCallback previewCallback;
     private HandlerThread thread;
     private Handler cameraExecutor;
+    private final ExecutorService snapExecutor = Executors.newSingleThreadExecutor();
 
     private OrientationEventListener orientationEventListener;
     private int lastRotation;
@@ -677,8 +679,8 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
                     camera.setPreviewCallbackWithBuffer(previewCallback);
                 }
             } catch (RuntimeException e) {
-                android.util.Log.v(getClass().getSimpleName(),
-                        "setPreviewCallbackSync(). Could not set preview callback.");
+                android.util.Log.e(getClass().getSimpleName(),
+                        "setPreviewCallbackSync(). Could not set preview callback.",e);
             }
         }
     }
@@ -1019,6 +1021,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
         super.onDetachedFromWindow();
         try {
             thread.quit();
+            snapExecutor.shutdown();
         } catch (Throwable e) {
             Log.e("CameraView", "Error stopping camera thread", e);
         }
@@ -1038,8 +1041,18 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
                 CameraView.this.setCameraParameters(previewParams);
             }
 
-            if (data != null) {
-                new ImageCleanupTask(getContext(), data, cameraId, xact).start();
+            final byte[] finalizedData = data;
+            if (finalizedData != null) {
+                snapExecutor.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            new ImageCleanupTask(getContext(), finalizedData, cameraId, xact).run();
+                        } catch (Throwable e) {
+                            Log.e("CameraView", "Error camera thread stopped", e);
+                        }
+                    }
+                });
             }
 
             if (!xact.useSingleShotMode()) {
