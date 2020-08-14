@@ -40,8 +40,6 @@ import android.view.WindowManager;
 import com.commonsware.cwac.camera.CameraHost.FailureReason;
 
 import java.io.IOException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class CameraView extends ViewGroup implements AutoFocusCallback {
 
@@ -63,9 +61,8 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
     private boolean isDetectingFaces = false;
     private boolean isAutoFocusing = false;
     private Camera.PreviewCallback previewCallback;
-    private HandlerThread thread;
-    private Handler cameraExecutor;
-    private final ExecutorService snapExecutor = Executors.newSingleThreadExecutor();
+    private static HandlerThread thread;
+    private static Handler cameraExecutor;
 
     private OrientationEventListener orientationEventListener;
     private int lastRotation;
@@ -74,11 +71,14 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
     private boolean isOrientationLocked = false;
     private boolean isOrientationHardLocked = false;
 
-    public CameraView(Context context) {
-        super(context);
+    static {
         thread = new HandlerThread("CWAC_CAMERA", HandlerThread.MAX_PRIORITY);
         thread.start();
         cameraExecutor = new Handler(thread.getLooper());
+    }
+
+    public CameraView(Context context) {
+        super(context);
         onOrientationChange = new OnOrientationChange(context);
     }
 
@@ -440,12 +440,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
     }
 
     public void takePicture(final PictureTransaction xact) {
-        postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                takePictureAsync(xact);
-            }
-        }, xact.host.getDeviceProfile().getPictureDelay());
+        takePictureAsync(xact);
     }
 
     private void takePictureAsync(final PictureTransaction xact) {
@@ -480,7 +475,6 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
                 if (!onOrientationChange.isEnabled()) {
                     setCameraPictureOrientation(pictureParams);
                 }
-
 
                 camera.setParameters(xact.host.adjustPictureParameters(xact, pictureParams));
                 camera.takePicture(xact.host.getShutterCallback(), null,
@@ -1019,12 +1013,6 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        try {
-            thread.quit();
-            snapExecutor.shutdown();
-        } catch (Throwable e) {
-            Log.e("CameraView", "Error stopping camera thread", e);
-        }
     }
 
     private class PictureTransactionCallback implements
@@ -1041,18 +1029,8 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
                 CameraView.this.setCameraParameters(previewParams);
             }
 
-            final byte[] finalizedData = data;
-            if (finalizedData != null) {
-                snapExecutor.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            new ImageCleanupTask(getContext(), finalizedData, cameraId, xact).run();
-                        } catch (Throwable e) {
-                            Log.e("CameraView", "Error camera thread stopped", e);
-                        }
-                    }
-                });
+            if (data != null) {
+                new ImageCleanupTask(getContext(), data, cameraId, xact).start();
             }
 
             if (!xact.useSingleShotMode()) {
