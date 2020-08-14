@@ -1029,8 +1029,18 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
                 CameraView.this.setCameraParameters(previewParams);
             }
 
-            if (data != null) {
-                new ImageCleanupTask(getContext(), data, cameraId, xact).start();
+            final byte[] finalizedData = data;
+            if (finalizedData != null) {
+                cameraExecutor.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            new ImageCleanupTask(getContext(), finalizedData, cameraId, xact).run();
+                        } catch (Throwable e) {
+                            Log.e("CameraView", "Error camera thread stopped", e);
+                        }
+                    }
+                });
             }
 
             if (!xact.useSingleShotMode()) {
