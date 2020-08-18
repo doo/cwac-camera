@@ -129,7 +129,6 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
     }
 
     public void setCameraParameters(final Camera.Parameters parameters) {
-
         handler.post(new Runnable() {
             @Override
             public void run() {
