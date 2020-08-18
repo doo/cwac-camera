@@ -1010,11 +1010,6 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
         }
     }
 
-    @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-    }
-
     private class PictureTransactionCallback implements
             Camera.PictureCallback {
         PictureTransaction xact = null;
