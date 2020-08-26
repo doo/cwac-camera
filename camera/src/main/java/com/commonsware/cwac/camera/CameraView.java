@@ -52,7 +52,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
     private PreviewStrategy previewStrategy;
     private Camera.Size previewSize;
     private Camera camera = null;
-    private boolean inPreview = false;
+    protected boolean inPreview = false;
     private CameraHost host = null;
     private OnOrientationChange onOrientationChange = null;
     private int displayOrientation = -1;
