@@ -38,13 +38,13 @@ class SurfacePreviewStrategy implements PreviewStrategy,
 
   @Override
   public void surfaceCreated(SurfaceHolder holder) {
-    cameraView.previewCreated();
+    cameraView.trySetPreviewDisplay(holder, holder.getSurfaceFrame().right, holder.getSurfaceFrame().bottom);
   }
 
   @Override
   public void surfaceChanged(SurfaceHolder holder, int format,
                              int width, int height) {
-    cameraView.initPreview(width, height);
+    cameraView.previewReset(width, height);
   }
 
   @Override
@@ -54,8 +54,8 @@ class SurfacePreviewStrategy implements PreviewStrategy,
   }
 
   @Override
-  public void attach(Camera camera) throws IOException {
-    camera.setPreviewDisplay(previewHolder);
+  public void attach(Camera camera) {
+    cameraView.trySetPreviewDisplay(previewHolder, previewHolder.getSurfaceFrame().right, previewHolder.getSurfaceFrame().bottom);
   }
 
   @Override
