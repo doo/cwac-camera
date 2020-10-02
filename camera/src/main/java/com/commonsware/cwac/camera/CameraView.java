@@ -139,6 +139,39 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
         });
     }
 
+    public void setDefaultPreviewSize(final Camera.Size newPreviewSize) {
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                Camera.Parameters cameraParameters = getCameraParameters();
+                if (cameraParameters != null) {
+                    cameraParameters.setPreviewSize(newPreviewSize.width, newPreviewSize.height);
+                }
+                setCameraParametersSync(cameraParameters);
+
+                post(new Runnable() {
+                    @Override
+                    public void run() {
+                        requestLayout();
+                    }
+                });
+            }
+        });
+    }
+
+    public void setDefaultPictureSize(final Camera.Size newPictureSize) {
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                Camera.Parameters cameraParameters = getCameraParameters();
+                if (cameraParameters != null) {
+                    cameraParameters.setPictureSize(newPictureSize.width, newPictureSize.height);
+                }
+                setCameraParametersSync(cameraParameters);
+            }
+        });
+    }
+
     /**
      * Run only in executor
      *
