@@ -19,8 +19,7 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
-import android.content.res.Configuration;
-import android.graphics.ImageFormat;
+import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.hardware.Camera.AutoFocusCallback;
 import android.hardware.Camera.CameraInfo;
@@ -35,6 +34,7 @@ import android.util.Log;
 import android.view.Display;
 import android.view.OrientationEventListener;
 import android.view.Surface;
+import android.view.SurfaceHolder;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -52,7 +52,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
     private PreviewStrategy previewStrategy;
     private Camera.Size previewSize;
     private Camera camera = null;
-    private boolean inPreview = false;
+    protected boolean inPreview = false;
     private CameraHost host = null;
     private OnOrientationChange onOrientationChange = null;
     private int displayOrientation = -1;
@@ -139,6 +139,39 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
         });
     }
 
+    public void setDefaultPreviewSize(final Camera.Size newPreviewSize) {
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                Camera.Parameters cameraParameters = getCameraParameters();
+                if (cameraParameters != null) {
+                    cameraParameters.setPreviewSize(newPreviewSize.width, newPreviewSize.height);
+                }
+                setCameraParametersSync(cameraParameters);
+
+                post(new Runnable() {
+                    @Override
+                    public void run() {
+                        requestLayout();
+                    }
+                });
+            }
+        });
+    }
+
+    public void setDefaultPictureSize(final Camera.Size newPictureSize) {
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                Camera.Parameters cameraParameters = getCameraParameters();
+                if (cameraParameters != null) {
+                    cameraParameters.setPictureSize(newPictureSize.width, newPictureSize.height);
+                }
+                setCameraParametersSync(cameraParameters);
+            }
+        });
+    }
+
     /**
      * Run only in executor
      *
@@ -164,6 +197,12 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
      * @param camera
      */
     public void onCameraOpen(Camera camera) throws RuntimeException {
+        try {
+            previewStrategy.attach(camera);
+        } catch (IOException | RuntimeException e) {
+            getCameraHost().handleException(e);
+        }
+
         windowManager = (WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE);
         if (isOrientationLocked
                 && !isOrientationHardLocked) {
@@ -176,8 +215,6 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
                 && getCameraHost() instanceof Camera.FaceDetectionListener) {
             camera.setFaceDetectionListener((Camera.FaceDetectionListener) getCameraHost());
         }
-
-        setPreviewCallback(previewCallback);
 
         if (orientationEventListener == null) {
             orientationEventListener = new OrientationEventListener(getContext(),
@@ -295,11 +332,12 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
                             } else if (previewSize.width != newSize.width
                                     || previewSize.height != newSize.height) {
                                 if (inPreview) {
-                                    stopPreview();
+                                    stopPreviewSync();
                                 }
 
                                 previewSize = newSize;
-                                initPreview(width, height, false);
+
+                                initPreviewSync(width, height);
                             }
                         }
                         post(
@@ -704,15 +742,36 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
         return (getCameraHost().getDeviceProfile().doesZoomActuallyWork(info.facing == CameraInfo.CAMERA_FACING_FRONT));
     }
 
-    void previewCreated() {
+    void trySetPreviewTexture(final SurfaceTexture surface, final int initialWidth, final int initialHeight) {
         handler.post(new Runnable() {
             @Override
             public void run() {
-                if (camera != null) {
+                if (camera != null && surface != null) {
                     try {
-                        previewStrategy.attach(camera);
-                    } catch (IOException | RuntimeException e) {
-                        getCameraHost().handleException(e);
+                        camera.setPreviewTexture(surface);
+                        initPreviewSync(initialWidth, initialHeight);
+                    } catch (IOException e) {
+                        Log.e(getClass().getSimpleName(),
+                                "Could not set Preview Texture.",
+                                e);
+                    }
+                }
+            }
+        });
+    }
+
+    void trySetPreviewDisplay(final SurfaceHolder surfaceHolder, final int initialWidth, final int initialHeight) {
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                if (camera != null && surfaceHolder != null && surfaceHolder.getSurface() != null) {
+                    try {
+                        camera.setPreviewDisplay(surfaceHolder);
+                        initPreviewSync(initialWidth, initialHeight);
+                    } catch (IOException e) {
+                        Log.e(getClass().getSimpleName(),
+                                "Could not set Preview Display.",
+                                e);
                     }
                 }
             }
@@ -745,18 +804,11 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
     }
 
     void previewReset(int width, int height) {
-        previewStopped();
         initPreview(width, height);
     }
 
-    private void previewStopped() {
-        if (inPreview) {
-            stopPreview();
-        }
-    }
-
-    public void initPreview(int w, int h) {
-        initPreview(w, h, true);
+    public void initPreview(int width, int height) {
+        initPreview(width, height, true);
     }
 
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
@@ -764,36 +816,40 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
         handler.post(new Runnable() {
             @Override
             public void run() {
-                if (camera != null) {
-                    try {
-                        Camera.Parameters parameters = getCameraParameters();
-                        if (previewSize == null) {
-                            previewSize = getCameraHost().getPreviewSize(getDisplayOrientation(), w, h, parameters);
-                        }
-
-                        parameters.setPreviewSize(previewSize.width, previewSize.height);
-
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-                            parameters.setRecordingHint(getCameraHost().getRecordingHint() != CameraHost.RecordingHint.STILL_ONLY);
-                        }
-
-                        setCameraParametersSync(getCameraHost().adjustPreviewParameters(parameters));
-                    } catch (Exception e) {
-                        android.util.Log.v(getClass().getSimpleName(),
-                                "initPreview(). Could not work with camera parameters.");
-                    }
-
-                    post(new Runnable() {
-                        @Override
-                        public void run() {
-                            requestLayout();
-                        }
-                    });
-
-                    startPreviewSync();
-                }
+                initPreviewSync(w, h);
             }
         });
+    }
+
+    public void initPreviewSync(final int w, final int h) {
+        if (camera != null) {
+            try {
+                Camera.Parameters parameters = getCameraParameters();
+                if (previewSize == null) {
+                    previewSize = getCameraHost().getPreviewSize(getDisplayOrientation(), w, h, parameters);
+                }
+
+                parameters.setPreviewSize(previewSize.width, previewSize.height);
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+                    parameters.setRecordingHint(getCameraHost().getRecordingHint() != CameraHost.RecordingHint.STILL_ONLY);
+                }
+
+                setCameraParametersSync(getCameraHost().adjustPreviewParameters(parameters));
+            } catch (Exception e) {
+                Log.v(getClass().getSimpleName(),
+                        "initPreview(). Could not work with camera parameters.");
+            }
+
+            post(new Runnable() {
+                @Override
+                public void run() {
+                    requestLayout();
+                }
+            });
+
+            startPreviewSync();
+        }
     }
 
     public void startPreview() {
