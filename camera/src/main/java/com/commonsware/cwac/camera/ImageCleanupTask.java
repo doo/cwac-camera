@@ -101,6 +101,10 @@ public class ImageCleanupTask  {
           }
         }
 
+        if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT && xact.mirrorFFC()) {
+          imageOrientation = (imageOrientation + 180) % 360;
+        }
+
         if (imageOrientation != 0) {
           matrix=
               rotate((matrix == null ? new Matrix() : matrix),

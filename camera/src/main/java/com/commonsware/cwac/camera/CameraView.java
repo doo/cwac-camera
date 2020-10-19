@@ -49,7 +49,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
     private static final int UPDATE_RATE_US = 200 * 1000;
 
     static final String TAG = "CWAC-Camera";
-    private PreviewStrategy previewStrategy;
+    protected PreviewStrategy previewStrategy;
     private Camera.Size previewSize;
     private Camera camera = null;
     protected boolean inPreview = false;
