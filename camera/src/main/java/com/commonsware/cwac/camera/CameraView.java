@@ -409,24 +409,6 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
         return (displayOrientation);
     }
 
-    @Deprecated
-    public void lockToLandscape() {
-        Context context = getContext();
-        if (context instanceof Activity) {
-            ((Activity) context).setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
-        }
-        lockOrientation();
-    }
-
-    @Deprecated
-    public void lockToPortrait() {
-        Context context = getContext();
-        if (context instanceof Activity) {
-            ((Activity) context).setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT);
-        }
-        lockOrientation();
-    }
-
     public void lockToLandscape(boolean lockPicture) {
         Context context = getContext();
         if (context instanceof Activity) {
@@ -446,17 +428,12 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
     }
 
     private void lockOrientation() {
-        post(new Runnable() {
-            @Override
-            public void run() {
-                setCameraDisplayOrientationAsync();
-                if (!isOrientationHardLocked) {
-                    onOrientationChange.enable();
-                } else {
-                    setPictureOrientationAsync();
-                }
-            }
-        });
+        setCameraDisplayOrientation();
+        if (!isOrientationHardLocked) {
+            onOrientationChange.enable();
+        } else {
+            setPictureOrientation();
+        }
     }
 
     public void unlockOrientation() {
@@ -906,17 +883,12 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
         });
     }
 
-    private void setPictureOrientationAsync() {
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                Camera.Parameters parameters = getCameraParameters();
-                if (parameters != null) {
-                    setCameraPictureOrientation(parameters);
-                    setCameraParametersSync(parameters);
-                }
-            }
-        });
+    private void setPictureOrientation() {
+        Camera.Parameters parameters = getCameraParameters();
+        if (parameters != null) {
+            setCameraPictureOrientation(parameters);
+            setCameraParametersSync(parameters);
+        }
     }
 
     // based on
@@ -990,6 +962,12 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
             outputOrientation = (360 - displayOrientation) % 360;
         } else {
             outputOrientation = displayOrientation;
+        }
+
+        // We have to make sure that outputOrientation is 0, 90, 180 or 270.
+        // Some devices have display orientation issues (like Nokia 6.2) and return invalid device rotation.
+        if (outputOrientation % 90 != 0) {
+            outputOrientation = 0;
         }
 
         params.setRotation(outputOrientation);
