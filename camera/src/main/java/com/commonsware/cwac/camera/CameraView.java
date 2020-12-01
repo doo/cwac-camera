@@ -64,7 +64,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
     private boolean isAutoFocusing = false;
     private Camera.PreviewCallback previewCallback;
     private static HandlerThread thread;
-    private static Handler handler;
+    private static Handler cameraHandler;
 
     private OrientationEventListener orientationEventListener;
     private int lastRotation;
@@ -76,7 +76,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
     static {
         thread = new HandlerThread("CWAC_CAMERA", HandlerThread.MAX_PRIORITY);
         thread.start();
-        handler = new Handler(thread.getLooper());
+        cameraHandler = new Handler(thread.getLooper());
     }
 
     public CameraView(Context context) {
@@ -131,7 +131,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
     }
 
     public void setCameraParameters(final Camera.Parameters parameters) {
-        handler.post(new Runnable() {
+        cameraHandler.post(new Runnable() {
             @Override
             public void run() {
                 setCameraParametersSync(parameters);
@@ -140,7 +140,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
     }
 
     public void setDefaultPreviewSize(final Camera.Size newPreviewSize) {
-        handler.post(new Runnable() {
+        cameraHandler.post(new Runnable() {
             @Override
             public void run() {
                 Camera.Parameters cameraParameters = getCameraParameters();
@@ -160,7 +160,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
     }
 
     public void setDefaultPictureSize(final Camera.Size newPictureSize) {
-        handler.post(new Runnable() {
+        cameraHandler.post(new Runnable() {
             @Override
             public void run() {
                 Camera.Parameters cameraParameters = getCameraParameters();
@@ -251,7 +251,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
         addView(previewStrategy.getWidget());
 
 
-        handler.post(new Runnable() {
+        cameraHandler.post(new Runnable() {
             @Override
             public void run() {
                 if (camera == null) {
@@ -299,7 +299,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
         setMeasuredDimension(width, height);
 
         if (width > 0 && height > 0) {
-            handler.post(new Runnable() {
+            cameraHandler.post(new Runnable() {
                 @Override
                 public void run() {
                     if (camera != null && getCameraParameters() != null) {
@@ -471,7 +471,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
     }
 
     private void takePictureAsync(final PictureTransaction xact) {
-        handler.post(new Runnable() {
+        cameraHandler.post(new Runnable() {
             @Override
             public void run() {
                 if (inPreview) {
@@ -572,7 +572,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
     }
 
     public void autoFocus() {
-        handler.post(new Runnable() {
+        cameraHandler.post(new Runnable() {
             @Override
             public void run() {
                 if (inPreview && camera != null) {
@@ -589,7 +589,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
     }
 
     public void cancelAutoFocus() {
-        handler.post(new Runnable() {
+        cameraHandler.post(new Runnable() {
             @Override
             public void run() {
                 if (camera != null) {
@@ -622,7 +622,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
     }
 
     public void setFlashMode(final String mode) {
-        handler.post(new Runnable() {
+        cameraHandler.post(new Runnable() {
             @Override
             public void run() {
                 if (camera != null) {
@@ -672,7 +672,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
     public void setPreviewCallback(final Camera.PreviewCallback callback) {
         previewCallback = callback;
 
-        handler.post(new Runnable() {
+        cameraHandler.post(new Runnable() {
             @Override
             public void run() {
                 setPreviewCallbackSync(callback);
@@ -681,7 +681,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
     }
 
     public void addPreviewCallbackBuffer(final byte[] buffer) {
-        handler.post(new Runnable() {
+        cameraHandler.post(new Runnable() {
             @Override
             public void run() {
                 addPreviewCallbackBufferSync(buffer);
@@ -720,7 +720,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
     }
 
     void trySetPreviewTexture(final SurfaceTexture surface, final int initialWidth, final int initialHeight) {
-        handler.post(new Runnable() {
+        cameraHandler.post(new Runnable() {
             @Override
             public void run() {
                 if (camera != null && surface != null) {
@@ -738,7 +738,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
     }
 
     void trySetPreviewDisplay(final SurfaceHolder surfaceHolder, final int initialWidth, final int initialHeight) {
-        handler.post(new Runnable() {
+        cameraHandler.post(new Runnable() {
             @Override
             public void run() {
                 if (camera != null && surfaceHolder != null && surfaceHolder.getSurface() != null) {
@@ -756,7 +756,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
     }
 
     void previewDestroyed() {
-        handler.post(new Runnable() {
+        cameraHandler.post(new Runnable() {
             @Override
             public void run() {
                 if (camera != null) {
@@ -790,7 +790,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
 
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     public void initPreview(final int w, final int h, boolean firstRun) {
-        handler.post(new Runnable() {
+        cameraHandler.post(new Runnable() {
             @Override
             public void run() {
                 initPreviewSync(w, h);
@@ -830,7 +830,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
     }
 
     public void startPreview() {
-        handler.post(new Runnable() {
+        cameraHandler.post(new Runnable() {
             @Override
             public void run() {
                 startPreviewSync();
@@ -852,7 +852,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
     }
 
     public void stopPreview() {
-        handler.post(new Runnable() {
+        cameraHandler.post(new Runnable() {
             @Override
             public void run() {
                 stopPreviewSync();
@@ -875,7 +875,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
     }
 
     private void setCameraDisplayOrientationAsync() {
-        handler.post(new Runnable() {
+        cameraHandler.post(new Runnable() {
             @Override
             public void run() {
                 setCameraDisplayOrientation();
@@ -1069,7 +1069,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
 
             final byte[] finalizedData = data;
             if (finalizedData != null) {
-                handler.post(new Runnable() {
+                cameraHandler.post(new Runnable() {
                     @Override
                     public void run() {
                         try {
