@@ -206,7 +206,7 @@ public class CameraFragment extends Fragment {
    * screen orientation is.
    */
   public void lockToLandscape() {
-    cameraView.lockToLandscape();
+    cameraView.lockToLandscape(false);
   }
 
   /**
