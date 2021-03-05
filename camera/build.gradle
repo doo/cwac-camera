@@ -1,11 +1,16 @@
 buildscript {
     repositories {
         google()
-        jcenter()
         mavenCentral()
+        jcenter {
+            content {
+                // https://youtrack.jetbrains.com/issue/IDEA-261387
+                includeModule("org.jetbrains.trove4j", "trove4j")
+            }
+        }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.3.1'
+        classpath 'com.android.tools.build:gradle:4.1.2'
         classpath 'com.github.dcendents:android-maven-plugin:1.0'
     }
 }
@@ -13,15 +18,20 @@ buildscript {
 apply plugin: 'com.android.library'
 apply plugin: 'maven'
 
-version '0.6.41'
+version '0.6.42'
 group 'com.commonsware.cwac.camera'
 
 def publishArtifactId = 'camera'
 
 repositories {
     google()
-    jcenter()
     mavenCentral()
+    jcenter {
+        content {
+            // https://youtrack.jetbrains.com/issue/IDEA-261387
+            includeModule("org.jetbrains.trove4j", "trove4j")
+        }
+    }
 
     maven {
         url 'http://nexus.scanbot.io/nexus/content/repositories/releases/'
