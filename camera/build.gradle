@@ -1,3 +1,4 @@
+
 buildscript {
     repositories {
         google()
@@ -5,44 +6,33 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.3.1'
-        classpath 'com.github.dcendents:android-maven-plugin:1.0'
+        classpath "com.android.tools.build:gradle:3.6.0"
+        classpath "com.github.dcendents:android-maven-plugin:1.0"
     }
 }
 
-apply plugin: 'com.android.library'
-apply plugin: 'maven'
+apply plugin: "com.android.library"
+apply plugin: "maven-publish"
 
-version '0.6.41'
-group 'com.commonsware.cwac.camera'
-
-def publishArtifactId = 'camera'
+group "com.commonsware.cwac.camera"
+def publishArtifactId = "camera"
+version "0.6.41"
 
 repositories {
     google()
     jcenter()
     mavenCentral()
 
-    maven {
-        url 'http://nexus.scanbot.io/nexus/content/repositories/releases/'
-    }
-    maven {
-        url 'http://nexus.scanbot.io/nexus/content/repositories/snapshots/'
-    }
-    maven {
-        url 'https://oss.sonatype.org/content/repositories/releases/'
-    }
-    maven {
-        url 'https://oss.sonatype.org/content/repositories/snapshots/'
-    }
-    maven {
-        url "https://s3.amazonaws.com/repo.commonsware.com"
-    }
+    maven { url "http://nexus.scanbot.io/nexus/content/repositories/releases/" }
+    maven { url "http://nexus.scanbot.io/nexus/content/repositories/snapshots/" }
+    maven { url "https://oss.sonatype.org/content/repositories/releases/" }
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+    maven { url "https://s3.amazonaws.com/repo.commonsware.com" }
 }
 
 dependencies {
-    api fileTree(dir: 'libs', include: '*.jar')
-    api 'androidx.legacy:legacy-support-v4:1.0.0'
+    api fileTree(dir: "libs", include: "*.jar")
+    api "androidx.legacy:legacy-support-v4:1.0.0"
 }
 
 android {
@@ -54,19 +44,28 @@ android {
     }
 }
 
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            snapshotRepository(url: "http://nexus.scanbot.io/nexus/content/repositories/snapshots/") {
-                authentication(userName: project.getProperty('NEXUS_LOGIN'), password: project.getProperty('NEXUS_PASSWORD'))
+afterEvaluate {
+    publishing {
+        publications {
+            ScanbotSDK(MavenPublication) {
+                groupId = "$project.group"
+                artifactId = publishArtifactId
+                version = "$project.version"
+                from components.release
             }
-            repository(url: "http://nexus.scanbot.io/nexus/content/repositories/releases/") {
-                authentication(userName: project.getProperty('NEXUS_LOGIN'), password: project.getProperty('NEXUS_PASSWORD'))
-            }
+        }
+        repositories {
+            maven {
+                name = "ScanbotNexus"
 
-            pom.version = project.version
-            pom.artifactId = publishArtifactId
-            pom.groupId = project.group
+                def snapshotsRepoUrl = "http://nexus.scanbot.io/nexus/content/repositories/snapshots/"
+                def releasesRepoUrl = "http://nexus.scanbot.io/nexus/content/repositories/releases/"
+                url = version.endsWith("SNAPSHOT") ? snapshotsRepoUrl : releasesRepoUrl
+                credentials {
+                    username = project.getProperty("NEXUS_LOGIN")
+                    password = project.getProperty("NEXUS_PASSWORD")
+                }
+            }
         }
     }
 }
