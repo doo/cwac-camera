@@ -2,7 +2,6 @@
 buildscript {
     repositories {
         google()
-        jcenter()
         mavenCentral()
     }
     dependencies {
@@ -20,7 +19,6 @@ version "0.6.41"
 
 repositories {
     google()
-    jcenter()
     mavenCentral()
 
     maven { url "https://nexus.scanbot.io/nexus/content/repositories/releases/" }
